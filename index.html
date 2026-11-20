@@ -8,10 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Official Google Identity Services (GSI) for real Gmail Account Chooser -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Google Fonts: Padauk & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -20,6 +22,10 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'Padauk', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glass': '0 10px 30px -5px rgba(79, 70, 229, 0.14), 0 4px 12px -4px rgba(15, 23, 42, 0.06)',
+                        'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 4px -1px rgba(15, 23, 42, 0.03)',
                     }
                 }
             }
@@ -32,18 +38,37 @@
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Splash & Entry Animations */
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(14px, -18px) scale(1.08); }
+        }
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1) rotate(-2deg); box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.45); }
+            50% { transform: scale(1.05) rotate(2deg); box-shadow: 0 25px 50px -10px rgba(139, 92, 246, 0.6); }
+        }
+        @keyframes shimmerBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+        }
+        .animate-orb { animation: floatOrb 6s ease-in-out infinite; }
+        .animate-orb-slow { animation: floatOrb 9s ease-in-out infinite reverse; }
+        .animate-logo-float { animation: pulseLogo 3.2s ease-in-out infinite; }
+        .animate-shimmer { animation: shimmerBar 1.4s ease-in-out infinite; }
+
         .modal-enter {
             animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
+            from { transform: translateY(28px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
         .fade-in {
-            animation: fadeIn 0.25s ease-out forwards;
+            animation: fadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
@@ -51,54 +76,197 @@
 <body class="bg-slate-200 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased flex justify-center min-h-screen transition-colors duration-300">
 
     <!-- Mobile App Container -->
-    <div class="w-full max-w-md bg-slate-50 dark:bg-slate-900 min-h-screen shadow-2xl relative flex flex-col overflow-x-hidden transition-colors duration-300">
+    <div class="w-full max-w-md bg-gradient-to-b from-slate-50 via-slate-50 to-indigo-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 min-h-screen shadow-2xl relative flex flex-col overflow-x-hidden transition-colors duration-300">
+
+        <!-- ==================== 0. SPLASH / ENTRY ANIMATION OVERLAY ==================== -->
+        <div id="splashOverlay" onclick="dismissSplash()" class="fixed inset-0 z-50 flex justify-center pointer-events-auto transition-opacity duration-500">
+            <div class="w-full max-w-md h-full bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-800 dark:from-slate-950 dark:via-indigo-950 dark:to-violet-950 text-white relative overflow-hidden flex flex-col items-center justify-between p-8 select-none">
+                <div class="absolute -top-16 -left-16 w-56 h-56 rounded-full bg-fuchsia-400/25 blur-3xl animate-orb"></div>
+                <div class="absolute bottom-10 -right-16 w-64 h-64 rounded-full bg-cyan-300/20 blur-3xl animate-orb-slow"></div>
+
+                <div class="h-4"></div>
+
+                <div class="relative z-10 text-center fade-in">
+                    <div class="w-24 h-24 rounded-3xl bg-white/15 backdrop-blur-md border border-white/30 mx-auto flex items-center justify-center mb-6 animate-logo-float">
+                        <span class="text-5xl">💎</span>
+                    </div>
+                    <h1 class="text-2xl font-extrabold tracking-tight drop-shadow-xs">ငွေစာရင်းမှတ် App</h1>
+                    <p class="text-xs font-medium text-indigo-100/90 mt-1.5 tracking-wide">Money Tracker • Shop Stock • Myanmar Calendar</p>
+
+                    <div class="w-44 h-1.5 bg-white/20 rounded-full overflow-hidden mx-auto mt-7">
+                        <div class="w-1/2 h-full bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+                    </div>
+                </div>
+
+                <p class="relative z-10 text-[11px] text-indigo-200/80">
+                    <span data-i18n="splashTapHint">ဆက်သွားရန် နှိပ်ပါ သို့မဟုတ် ခဏစောင့်ပါ...</span>
+                </p>
+            </div>
+        </div>
         
-        <!-- ==================== 1. LOGIN SCREEN ==================== -->
-        <div id="loginScreen" class="flex-1 flex flex-col justify-between p-6 fade-in">
-            <!-- Top Bar on Login (Language & Theme) -->
-            <div class="flex justify-between items-center pt-2">
-                <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-indigo-600 dark:text-indigo-400 shadow-xs flex items-center gap-1.5 active:scale-95 transition">
+        <!-- ==================== 1. LOGIN & SIGN UP SCREEN ==================== -->
+        <div id="loginScreen" class="flex-1 flex flex-col justify-between p-5 relative overflow-hidden fade-in">
+            <!-- Decorative Ambient Orbs -->
+            <div class="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-indigo-500/15 dark:bg-indigo-500/20 blur-3xl animate-orb"></div>
+            <div class="pointer-events-none absolute top-40 -left-20 w-52 h-52 rounded-full bg-violet-500/15 dark:bg-violet-500/20 blur-3xl animate-orb-slow"></div>
+
+            <!-- Top Bar on Login -->
+            <div class="relative z-10 flex justify-between items-center pt-1">
+                <button onclick="toggleLanguage()" class="px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-indigo-600 dark:text-indigo-400 shadow-xs flex items-center gap-1.5 active:scale-95 transition">
                     <span>🌐</span>
                     <span id="loginLangLabel">EN / မြန်မာ</span>
                 </button>
-                <button onclick="toggleTheme()" class="p-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 shadow-xs active:scale-95 transition" title="Toggle Theme">
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-amber-400 shadow-xs active:scale-95 transition" title="Toggle Theme">
                     <span class="theme-icon text-base">🌙</span>
                 </button>
             </div>
 
-            <!-- Hero Branding -->
-            <div class="text-center my-auto py-8">
-                <div class="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-indigo-600/30 mb-6 rotate-3">
-                    <span class="text-5xl -rotate-3">💰</span>
+            <!-- Hero Branding & Auth Card -->
+            <div class="relative z-10 my-auto py-4 space-y-5">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 via-violet-600 to-fuchsia-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-600/30 mb-3">
+                        <span class="text-3xl">💰</span>
+                    </div>
+                    <h1 data-i18n="appTitle" class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">ငွေစာရင်းမှတ် App</h1>
+                    <p data-i18n="loginSubtitle" class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mt-1 leading-relaxed">
+                        နေ့စဉ် ဝင်ငွေ/ထွက်ငွေ၊ ကုန်ပစ္စည်းစတော့နှင့် မြန်မာပြက္ခဒိန်
+                    </p>
                 </div>
-                <h1 data-i18n="appTitle" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">ငွေစာရင်းမှတ် App</h1>
-                <p data-i18n="loginSubtitle" class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
-                    သင်၏ နေ့စဉ် ဝင်ငွေ၊ ထွက်ငွေနှင့် မြန်မာပြက္ခဒိန်ကို တစ်နေရာတည်းတွင် စီမံခန့်ခွဲပါ
-                </p>
+
+                <!-- Sign In / Sign Up Card -->
+                <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-3xl p-4 shadow-glass border border-white dark:border-slate-700/80">
+                    <!-- Auth Mode Tabs -->
+                    <div class="grid grid-cols-2 gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl mb-4">
+                        <button type="button" id="authTabSignIn" onclick="setAuthMode('signin')" data-i18n="signInTab" class="py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">
+                            Sign In (အကောင့်ဝင်ရန်)
+                        </button>
+                        <button type="button" id="authTabSignUp" onclick="setAuthMode('signup')" data-i18n="signUpTab" class="py-2 text-xs font-bold rounded-xl text-slate-500 dark:text-slate-400 transition">
+                            Sign Up (အကောင့်သစ်)
+                        </button>
+                    </div>
+
+                    <!-- Auth Feedback Banner -->
+                    <div id="authFeedbackBox" class="hidden mb-3 p-2.5 rounded-xl text-xs font-semibold"></div>
+
+                    <!-- Username & Password Form -->
+                    <form id="credAuthForm" onsubmit="handleCredentialAuth(event)" class="space-y-3">
+                        <div id="signupNameGroup" class="hidden">
+                            <label data-i18n="displayNameLabel" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">အမည် (Display Name)</label>
+                            <input type="text" id="authDisplayNameInput" placeholder="သင်၏ အမည်"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+
+                        <div>
+                            <label data-i18n="usernameLabel" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Username</label>
+                            <input type="text" id="authUsernameInput" required autocomplete="username" placeholder="username"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <p id="usernameUniqueHint" data-i18n="usernameUniqueHint" class="hidden text-[10px] text-indigo-600 dark:text-indigo-400 mt-1">
+                                * တစ်ဦးသုံးပြီးသော Username ကို အခြားသူ ထပ်မံအသုံးပြု၍ မရပါ။
+                            </p>
+                        </div>
+
+                        <div>
+                            <label data-i18n="passwordLabel" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Password</label>
+                            <div class="relative">
+                                <input type="password" id="authPasswordInput" required autocomplete="current-password" placeholder="••••••••"
+                                    class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                <button type="button" onclick="toggleAuthPasswordVisibility()" class="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-indigo-600">
+                                    <span id="pwdEyeIcon">👁️</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="signupConfirmGroup" class="hidden">
+                            <label data-i18n="confirmPasswordLabel" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Password အတည်ပြုရန်</label>
+                            <input type="password" id="authConfirmPasswordInput" placeholder="••••••••"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+
+                        <button type="submit" id="credSubmitBtn" data-i18n="signInSubmitBtn" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/25 active:scale-[0.98] transition">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="flex items-center gap-2 my-3.5">
+                        <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+                        <span data-i18n="orDivider" class="text-[10px] font-bold text-slate-400 uppercase">OR</span>
+                        <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+                    </div>
+
+                    <!-- Official One-Tap Google Sign-In Container (Renders native Google "Continue as [Your Gmail]" when Client ID is active) -->
+                    <div id="gsiNativeButtonWrapper" class="hidden mb-2 flex justify-center"></div>
+
+                    <!-- Continue with Google Button -->
+                    <div class="space-y-2">
+                        <button type="button" onclick="handleContinueWithGoogle()" id="googleLoginBtn" class="w-full py-2.5 px-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-xs shadow-2xs flex items-center justify-center gap-2.5 active:scale-[0.98] transition">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
+                                <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
+                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
+                            </svg>
+                            <span data-i18n="googleBtn">Continue with Google</span>
+                        </button>
+
+                        <!-- Guest Mode -->
+                        <button type="button" onclick="continueAsGuest()" class="w-full py-2.5 px-3.5 bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition">
+                            <span>👤</span>
+                            <span data-i18n="guestBtn">ဧည့်သည် (Guest) အဖြစ် ဆက်သုံးမည်</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Auth Buttons -->
-            <div class="space-y-3 pb-6">
-                <!-- Google Sign In -->
-                <button onclick="signInWithGoogle()" id="googleLoginBtn" class="w-full py-3.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl font-semibold text-sm shadow-sm flex items-center justify-center gap-3 active:scale-[0.98] transition">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
-                        <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
-                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
-                    </svg>
-                    <span data-i18n="googleBtn">Google အကောင့်ဖြင့် ဝင်မည်</span>
-                </button>
+            <p data-i18n="loginNote" class="relative z-10 text-[10px] text-center text-slate-400 dark:text-slate-500 pb-1">
+                အကောင့်တစ်ခုချင်းစီအတွက် စာရင်းများကို သီးခြားစီ လုံခြုံစွာ သိမ်းဆည်းပေးပါမည်။
+            </p>
+        </div>
 
-                <!-- Guest Mode -->
-                <button onclick="continueAsGuest()" class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold text-sm shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 active:scale-[0.98] transition">
-                    <span>👤</span>
-                    <span data-i18n="guestBtn">ဧည့်သည် (Guest) အဖြစ် ဆက်သုံးမည်</span>
-                </button>
+        <!-- ==================== 1B. REAL GOOGLE OAUTH CONNECTION & SAVED GMAIL MODAL ==================== -->
+        <div id="googleConnectModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl modal-enter border dark:border-slate-700 space-y-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
+                        </svg>
+                        <h3 data-i18n="googleModalTitle" class="text-sm font-bold text-slate-800 dark:text-white">Google Sign-In ချိတ်ဆက်ရန်</h3>
+                    </div>
+                    <button onclick="closeGoogleConnectModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500 text-xs">✕</button>
+                </div>
 
-                <p data-i18n="loginNote" class="text-[11px] text-center text-slate-400 dark:text-slate-500 pt-2">
-                    Guest အဖြစ်သုံးပါက စာရင်းများကို ဤဖုန်းထဲတွင် သိမ်းဆည်းပေးပါမည်။
-                </p>
+                <!-- Previously Signed-in Real Google Accounts on This Device -->
+                <div id="previouslySignedGoogleSection" class="hidden space-y-2">
+                    <p data-i18n="savedGoogleAccountsLabel" class="text-[11px] font-bold text-slate-500 dark:text-slate-400">ယခင်ဝင်ရောက်ထားသော Google အကောင့်</p>
+                    <div id="realGoogleAccountsList" class="space-y-2"></div>
+                </div>
+
+                <!-- Live Google OAuth Client ID Setup -->
+                <div class="p-3.5 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-2xl border border-indigo-100 dark:border-indigo-800/40 space-y-2.5">
+                    <p data-i18n="googleSetupExplain" class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                        သင့်ဖုန်း/Browser ထဲရှိ <strong>Gmail အကောင့်အစစ်များ</strong> အလိုအလျောက်ပေါ်လာပြီး နှိပ်ရုံဖြင့် ဝင်နိုင်ရန် Google OAuth Client ID (သို့) Firebase Config ကို တစ်ကြိမ်သာ ချိတ်ဆက်ပေးပါ။
+                    </p>
+                    <ol class="text-[11px] text-slate-600 dark:text-slate-300 space-y-1 list-decimal list-inside">
+                        <li data-i18n="googleStep1">Google Cloud Console (သို့) Firebase Console သို့သွားပါ။</li>
+                        <li data-i18n="googleStep2">Authorized JavaScript origins တွင် သင့် Website URL (<code id="currentOriginDisplay" class="px-1 py-0.5 bg-white dark:bg-slate-900 rounded text-[10px]">https://bhone27.github.io</code>) ကို ထည့်ပါ။</li>
+                        <li data-i18n="googleStep3">ရရှိလာသော Google Client ID ကို အောက်တွင် ထည့်ပြီး Save နှိပ်ပါ။</li>
+                    </ol>
+                </div>
+
+                <form onsubmit="saveGoogleOAuthConfig(event)" class="space-y-2.5">
+                    <div>
+                        <label data-i18n="googleClientIdLabel" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Google OAuth Client ID (သို့) Firebase Config JSON</label>
+                        <input type="text" id="googleClientIdInput" required placeholder="1234567890-xxxx.apps.googleusercontent.com"
+                            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" data-i18n="activateGoogleBtn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition">
+                        Google Account Chooser ဖွင့်မည်
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -106,33 +274,33 @@
         <div id="mainAppScreen" class="hidden flex-1 flex flex-col pb-24">
             
             <!-- Shared Top Utility Bar -->
-            <header class="bg-indigo-600 dark:bg-indigo-950 text-white pt-4 pb-4 px-5 shadow-sm relative z-20 transition-colors duration-300">
+            <header class="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 text-white pt-4 pb-4 px-5 shadow-md relative z-20 border-b border-white/10 transition-colors duration-300">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2.5 overflow-hidden">
-                        <div id="userAvatar" class="w-9 h-9 rounded-full bg-indigo-400/40 border border-white/30 flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden">
+                        <div id="userAvatar" class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-xs border border-white/40 flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden shadow-xs">
                             👤
                         </div>
                         <div class="overflow-hidden">
                             <div class="flex items-center gap-1.5">
                                 <h1 id="userDisplayName" class="text-sm font-bold truncate">Guest User</h1>
-                                <span id="userModeBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-white/20 font-medium shrink-0">Guest</span>
+                                <span id="userModeBadge" class="text-[10px] px-1.5 py-0.5 rounded-md bg-white/20 font-semibold shrink-0">Guest</span>
                             </div>
-                            <p id="userEmailDisplay" class="text-[11px] text-indigo-200 truncate">Local Storage</p>
+                            <p id="userEmailDisplay" class="text-[11px] text-indigo-100/85 truncate">Local Storage</p>
                         </div>
                     </div>
 
-                    <!-- Quick Toggles: Language, Theme, Settings -->
+                    <!-- Quick Toggles: Calculator, Language, Theme, Settings -->
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button onclick="openCalculatorModal()" class="p-2 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl transition active:scale-95" title="Calculator">
+                        <button onclick="openCalculatorModal()" class="p-2 bg-white/15 hover:bg-white/25 rounded-xl transition active:scale-95" title="Calculator">
                             <span class="text-sm">🧮</span>
                         </button>
-                        <button onclick="toggleLanguage()" class="px-2.5 py-1.5 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl text-xs font-bold transition active:scale-95" title="Change Language">
+                        <button onclick="toggleLanguage()" class="px-2.5 py-1.5 bg-white/15 hover:bg-white/25 rounded-xl text-xs font-bold transition active:scale-95" title="Change Language">
                             <span id="headerLangCode">EN</span>
                         </button>
-                        <button onclick="toggleTheme()" class="p-2 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl transition active:scale-95" title="Dark / Light Mode">
+                        <button onclick="toggleTheme()" class="p-2 bg-white/15 hover:bg-white/25 rounded-xl transition active:scale-95" title="Dark / Light Mode">
                             <span class="theme-icon text-sm">🌙</span>
                         </button>
-                        <button onclick="openSettingsModal()" class="p-2 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl transition active:scale-95" title="Settings">
+                        <button onclick="openSettingsModal()" class="p-2 bg-white/15 hover:bg-white/25 rounded-xl transition active:scale-95" title="Settings">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -145,15 +313,15 @@
             <!-- ==================== TAB 1: MONEY TRACKER VIEW ==================== -->
             <div id="view-tracker" class="flex-1 flex flex-col fade-in">
                 <!-- Month Header Banner -->
-                <div class="bg-indigo-600 dark:bg-indigo-950 text-white pt-1 pb-20 px-5 rounded-b-[2rem] shadow-md relative z-10 transition-colors duration-300">
-                    <div class="flex items-center justify-between bg-indigo-700/60 dark:bg-indigo-900/70 px-3 py-1.5 rounded-xl border border-indigo-400/20">
-                        <button onclick="changeMonth(-1)" class="p-1 hover:bg-indigo-500/50 rounded-lg transition">
+                <div class="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 text-white pt-1 pb-20 px-5 rounded-b-[2.25rem] shadow-lg relative z-10 transition-colors duration-300">
+                    <div class="flex items-center justify-between bg-white/15 backdrop-blur-xs px-3 py-1.5 rounded-xl border border-white/20">
+                        <button onclick="changeMonth(-1)" class="p-1 hover:bg-white/20 rounded-lg transition active:scale-95">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
-                        <span id="currentMonthDisplay" class="text-sm font-semibold tracking-wide">2026 ခုနှစ်၊ နိုဝင်ဘာလ</span>
-                        <button onclick="changeMonth(1)" class="p-1 hover:bg-indigo-500/50 rounded-lg transition">
+                        <span id="currentMonthDisplay" class="text-sm font-bold tracking-wide">2026 ခုနှစ်၊ နိုဝင်ဘာလ</span>
+                        <button onclick="changeMonth(1)" class="p-1 hover:bg-white/20 rounded-lg transition active:scale-95">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
@@ -163,15 +331,14 @@
 
                 <!-- Balance Summary Card -->
                 <div class="px-5 -mt-14 relative z-20">
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-lg border border-slate-100 dark:border-slate-700/80 transition-colors duration-300">
-                        <div class="text-center pb-4 border-b border-slate-100 dark:border-slate-700">
-                            <p data-i18n="totalBalance" class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">စုစုပေါင်း လက်ကျန်ငွေ</p>
-                            <h2 id="totalBalance" class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">0 MMK</h2>
+                    <div class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-3xl p-5 shadow-glass border border-white dark:border-slate-700/80 transition-colors duration-300">
+                        <div class="text-center pb-4 border-b border-slate-100 dark:border-slate-700/80">
+                            <p data-i18n="totalBalance" class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">စုစုပေါင်း လက်ကျန်ငွေ</p>
+                            <h2 id="totalBalance" class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">0 MMK</h2>
                         </div>
                         <div class="grid grid-cols-2 gap-3 pt-4">
-                            <!-- Income -->
-                            <div class="flex items-center gap-2.5 bg-emerald-50/80 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-100/50 dark:border-emerald-800/30">
-                                <div class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <div class="flex items-center gap-2.5 bg-gradient-to-br from-emerald-50 to-teal-50/70 dark:from-emerald-950/50 dark:to-slate-900 p-3 rounded-2xl border border-emerald-200/60 dark:border-emerald-800/30">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                     </svg>
@@ -181,9 +348,8 @@
                                     <p id="totalIncome" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 truncate">0 MMK</p>
                                 </div>
                             </div>
-                            <!-- Expense -->
-                            <div class="flex items-center gap-2.5 bg-rose-50/80 dark:bg-rose-950/40 p-3 rounded-xl border border-rose-100/50 dark:border-rose-800/30">
-                                <div class="w-9 h-9 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                            <div class="flex items-center gap-2.5 bg-gradient-to-br from-rose-50 to-orange-50/60 dark:from-rose-950/50 dark:to-slate-900 p-3 rounded-2xl border border-rose-200/60 dark:border-rose-800/30">
+                                <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                     </svg>
@@ -199,11 +365,10 @@
 
                 <!-- Main Tracker Content -->
                 <main class="px-5 mt-5 space-y-5 flex-1">
-                    <!-- Expense Breakdown Chart Card -->
-                    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 transition-colors duration-300">
+                    <section class="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-card border border-slate-100 dark:border-slate-700/80 transition-colors duration-300">
                         <div class="flex justify-between items-center mb-3">
                             <h3 data-i18n="expenseBreakdown" class="text-sm font-bold text-slate-700 dark:text-slate-200">ထွက်ငွေ ခွဲခြမ်းစိတ်ဖြာမှု</h3>
-                            <span id="chartMonthLabel" class="text-xs text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-md">ယခုလ</span>
+                            <span id="chartMonthLabel" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50 dark:bg-indigo-950/70 px-2.5 py-0.5 rounded-full">ယခုလ</span>
                         </div>
                         
                         <div id="chartContainer" class="relative h-44 flex items-center justify-center">
@@ -215,40 +380,35 @@
                         </div>
                     </section>
 
-                    <!-- Transactions History Section -->
                     <section>
                         <div class="flex justify-between items-center mb-3">
                             <h3 data-i18n="historyTitle" class="text-base font-bold text-slate-800 dark:text-slate-100">ငွေစာရင်း မှတ်တမ်းများ</h3>
-                            <span id="transactionCount" class="text-xs text-slate-500 dark:text-slate-400 font-medium">0 ခု</span>
+                            <span id="transactionCount" class="text-xs text-slate-500 dark:text-slate-400 font-semibold">0 ခု</span>
                         </div>
 
-                        <!-- Search & Filter Controls -->
                         <div class="space-y-3 mb-4">
                             <div class="relative">
                                 <input type="text" id="searchInput" oninput="renderApp()" placeholder="မှတ်ချက် (သို့) အမျိုးအစား ရှာရန်..." 
-                                    class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition">
+                                    class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 shadow-2xs transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
 
-                            <!-- Filter Tabs -->
-                            <div class="grid grid-cols-3 gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl">
-                                <button onclick="setFilter('all')" id="tab-all" data-i18n="filterAll" class="py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">အားလုံး</button>
-                                <button onclick="setFilter('income')" id="tab-income" data-i18n="filterIncome" class="py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 transition">ဝင်ငွေ</button>
-                                <button onclick="setFilter('expense')" id="tab-expense" data-i18n="filterExpense" class="py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 transition">ထွက်ငွေ</button>
+                            <div class="grid grid-cols-3 gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-2xl">
+                                <button onclick="setFilter('all')" id="tab-all" data-i18n="filterAll" class="py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">အားလုံး</button>
+                                <button onclick="setFilter('income')" id="tab-income" data-i18n="filterIncome" class="py-1.5 text-xs font-bold rounded-xl text-slate-600 dark:text-slate-400 transition">ဝင်ငွေ</button>
+                                <button onclick="setFilter('expense')" id="tab-expense" data-i18n="filterExpense" class="py-1.5 text-xs font-bold rounded-xl text-slate-600 dark:text-slate-400 transition">ထွက်ငွေ</button>
                             </div>
                         </div>
 
-                        <!-- Transaction List -->
                         <div id="transactionList" class="space-y-2.5 pb-6"></div>
                     </section>
                 </main>
 
-                <!-- Floating Action Button (FAB) positioned above Bottom Nav -->
                 <div id="fabContainer" class="fixed bottom-20 left-0 right-0 flex justify-center pointer-events-none z-30">
                     <div class="w-full max-w-md px-5 flex justify-end">
-                        <button onclick="openAddModal()" class="pointer-events-auto bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-4 py-3 rounded-full shadow-xl shadow-indigo-600/35 flex items-center gap-2 font-semibold text-sm transition-all">
+                        <button onclick="openAddModal()" class="pointer-events-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 active:scale-95 text-white px-4 py-3 rounded-full shadow-xl shadow-indigo-600/35 flex items-center gap-2 font-bold text-sm transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                             </svg>
@@ -260,56 +420,51 @@
 
             <!-- ==================== TAB: SHOP INVENTORY & STOCK IN/OUT VIEW ==================== -->
             <div id="view-inventory" class="hidden flex-1 flex flex-col px-5 pt-5 pb-6 space-y-4 fade-in">
-                <!-- Inventory Header -->
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 data-i18n="invHeaderTitle" class="text-lg font-bold text-slate-800 dark:text-white">ကုန်ပစ္စည်းနှင့် စတော့စာရင်း</h2>
+                        <h2 data-i18n="invHeaderTitle" class="text-lg font-extrabold text-slate-800 dark:text-white">ကုန်ပစ္စည်းနှင့် စတော့စာရင်း</h2>
                         <p data-i18n="invHeaderSub" class="text-xs text-slate-500 dark:text-slate-400">လက်ကျန်ပစ္စည်းနှင့် အဝင်/အထွက် မှတ်တမ်း</p>
                     </div>
-                    <button onclick="openProductModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 flex items-center gap-1.5 active:scale-95 transition">
+                    <button onclick="openProductModal()" class="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/25 flex items-center gap-1.5 active:scale-95 transition">
                         <span>+</span>
                         <span data-i18n="addProductBtn">ပစ္စည်းသစ်</span>
                     </button>
                 </div>
 
-                <!-- Inventory KPI Summary Cards -->
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs">
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card">
                         <p data-i18n="invTotalItems" class="text-[10px] font-semibold text-slate-400">ပစ္စည်းအမျိုးအစား</p>
-                        <p id="invProductTypesCount" class="text-base font-bold text-slate-800 dark:text-white mt-0.5">0</p>
+                        <p id="invProductTypesCount" class="text-base font-extrabold text-slate-800 dark:text-white mt-0.5">0</p>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs">
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card">
                         <p data-i18n="invTotalStock" class="text-[10px] font-semibold text-slate-400">လက်ကျန်စုစုပေါင်း</p>
-                        <p id="invTotalStockCount" class="text-base font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">0</p>
+                        <p id="invTotalStockCount" class="text-base font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">0</p>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs">
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card">
                         <p data-i18n="invLowStock" class="text-[10px] font-semibold text-slate-400">လက်ကျန်နည်း</p>
-                        <p id="invLowStockCount" class="text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5">0</p>
+                        <p id="invLowStockCount" class="text-base font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">0</p>
                     </div>
                 </div>
 
-                <!-- Inventory Total Value Banner -->
-                <div class="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-900 dark:to-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex justify-between items-center">
+                <div class="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 dark:from-indigo-900 dark:to-slate-800 text-white p-4 rounded-2xl shadow-md flex justify-between items-center">
                     <div>
                         <p data-i18n="invTotalValueLabel" class="text-[11px] text-indigo-100">လက်ကျန်ပစ္စည်း စုစုပေါင်းတန်ဖိုး (ရောင်းဈေး)</p>
-                        <p id="invTotalValueAmount" class="text-lg font-bold tracking-tight">0 MMK</p>
+                        <p id="invTotalValueAmount" class="text-lg font-extrabold tracking-tight">0 MMK</p>
                     </div>
-                    <button onclick="exportInventoryCSV()" class="px-2.5 py-1.5 bg-white/15 hover:bg-white/25 rounded-xl text-[11px] font-bold transition active:scale-95">
+                    <button onclick="exportInventoryCSV()" class="px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-xl text-[11px] font-bold transition active:scale-95">
                         📥 CSV
                     </button>
                 </div>
 
-                <!-- Sub-Tabs: Product List vs Stock In/Out History -->
-                <div class="grid grid-cols-2 gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl">
-                    <button onclick="setInvSubTab('products')" id="inv-subtab-products" data-i18n="invSubProducts" class="py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">ပစ္စည်းစာရင်း (Stock)</button>
-                    <button onclick="setInvSubTab('logs')" id="inv-subtab-logs" data-i18n="invSubLogs" class="py-1.5 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 transition">အဝင်/အထွက် မှတ်တမ်း</button>
+                <div class="grid grid-cols-2 gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-2xl">
+                    <button onclick="setInvSubTab('products')" id="inv-subtab-products" data-i18n="invSubProducts" class="py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">ပစ္စည်းစာရင်း (Stock)</button>
+                    <button onclick="setInvSubTab('logs')" id="inv-subtab-logs" data-i18n="invSubLogs" class="py-1.5 text-xs font-bold rounded-xl text-slate-600 dark:text-slate-400 transition">အဝင်/အထွက် မှတ်တမ်း</button>
                 </div>
 
-                <!-- Sub-View A: Product List -->
                 <div id="invProductsSection" class="space-y-3">
                     <div class="relative">
                         <input type="text" id="invSearchInput" oninput="renderInventory()" placeholder="ပစ္စည်းအမည် ရှာရန်..." 
-                            class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition">
+                            class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -317,7 +472,6 @@
                     <div id="invProductList" class="space-y-2.5"></div>
                 </div>
 
-                <!-- Sub-View B: Stock In/Out Movement History -->
                 <div id="invLogsSection" class="hidden space-y-2.5">
                     <div class="flex gap-1.5">
                         <button onclick="setStockLogFilter('all')" id="log-filter-all" data-i18n="filterAll" class="px-3 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white">အားလုံး</button>
@@ -330,8 +484,7 @@
 
             <!-- ==================== TAB 2: BURMESE & ENGLISH CALENDAR VIEW ==================== -->
             <div id="view-calendar" class="hidden flex-1 flex flex-col px-5 pt-5 pb-6 space-y-4 fade-in">
-                <!-- Calendar Header Card -->
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-700 dark:from-indigo-900 dark:to-slate-800 text-white rounded-2xl p-4 shadow-md">
+                <div class="bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 dark:from-indigo-900 dark:to-slate-800 text-white rounded-3xl p-4 shadow-md">
                     <div class="flex justify-between items-center mb-3">
                         <button onclick="changeCalMonth(-1)" class="p-2 bg-white/15 hover:bg-white/25 rounded-xl transition active:scale-95">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -355,9 +508,7 @@
                     </div>
                 </div>
 
-                <!-- Calendar Grid Box -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-slate-100 dark:border-slate-700/80">
-                    <!-- Weekday Headers -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-3.5 shadow-card border border-slate-100 dark:border-slate-700/80">
                     <div id="calWeekdays" class="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 dark:text-slate-400 pb-2 border-b border-slate-100 dark:border-slate-700">
                         <span class="text-rose-500">တနင်္ဂနွေ</span>
                         <span>တနင်္လာ</span>
@@ -368,10 +519,8 @@
                         <span class="text-rose-500">စနေ</span>
                     </div>
 
-                    <!-- Days Matrix -->
                     <div id="calDaysGrid" class="grid grid-cols-7 gap-1 pt-2"></div>
 
-                    <!-- Legend -->
                     <div class="flex flex-wrap items-center justify-center gap-3 pt-3 mt-3 border-t border-slate-100 dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400">
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> <span data-i18n="fullMoonLegend">လပြည့်</span></span>
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-700 dark:bg-slate-300 inline-block"></span> <span data-i18n="newMoonLegend">လကွယ်</span></span>
@@ -380,8 +529,7 @@
                     </div>
                 </div>
 
-                <!-- Selected Day Detail Card -->
-                <div id="selectedDateDetailCard" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                <div id="selectedDateDetailCard" class="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-card border border-slate-100 dark:border-slate-700/80 space-y-3">
                     <div class="flex justify-between items-start">
                         <div>
                             <p id="detailEngDate" class="text-sm font-bold text-slate-800 dark:text-white">Monday, November 16, 2026</p>
@@ -402,48 +550,45 @@
 
             <!-- ==================== TAB 3: TOOLS & UTILITIES MENU VIEW ==================== -->
             <div id="view-tools" class="hidden flex-1 flex flex-col px-5 pt-5 pb-6 space-y-4 fade-in">
-                
-                <!-- Tools Hub Header -->
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 data-i18n="toolsHubTitle" class="text-lg font-bold text-slate-800 dark:text-white">မီနူးနှင့် အသုံးဝင်ကိရိယာများ</h2>
+                        <h2 data-i18n="toolsHubTitle" class="text-lg font-extrabold text-slate-800 dark:text-white">မီနူးနှင့် အသုံးဝင်ကိရိယာများ</h2>
                         <p data-i18n="toolsHubSub" class="text-xs text-slate-500 dark:text-slate-400">နေ့စဉ်သုံး တွက်ချက်မှုနှင့် မှတ်စုများ</p>
                     </div>
                 </div>
 
-                <!-- Quick Menu Grid Cards -->
                 <div class="grid grid-cols-2 gap-2.5">
-                    <button onclick="openCalculatorModal()" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                    <button onclick="openCalculatorModal()" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card text-left hover:border-indigo-400 transition active:scale-[0.98]">
                         <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg mb-2">🧮</div>
                         <p data-i18n="toolCalcName" class="text-xs font-bold text-slate-800 dark:text-white">ဂဏန်းတွက်စက်</p>
                         <p data-i18n="toolCalcDesc" class="text-[10px] text-slate-400 mt-0.5">Calculator & Quick Fill</p>
                     </button>
 
-                    <button onclick="switchMainTab('inventory')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                    <button onclick="switchMainTab('inventory')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card text-left hover:border-indigo-400 transition active:scale-[0.98]">
                         <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center text-lg mb-2">📦</div>
                         <p data-i18n="toolInvName" class="text-xs font-bold text-slate-800 dark:text-white">ကုန်ပစ္စည်းစာရင်း</p>
                         <p data-i18n="toolInvDesc" class="text-[10px] text-slate-400 mt-0.5">Stock In/Out & Sales</p>
                     </button>
 
-                    <button onclick="scrollToTool('tool-savings')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                    <button onclick="scrollToTool('tool-savings')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card text-left hover:border-indigo-400 transition active:scale-[0.98]">
                         <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg mb-2">🎯</div>
                         <p data-i18n="toolSavingsName" class="text-xs font-bold text-slate-800 dark:text-white">စုငွေပန်းတိုင်</p>
                         <p data-i18n="toolSavingsDesc" class="text-[10px] text-slate-400 mt-0.5">Savings Goal</p>
                     </button>
 
-                    <button onclick="scrollToTool('tool-currency')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                    <button onclick="scrollToTool('tool-currency')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card text-left hover:border-indigo-400 transition active:scale-[0.98]">
                         <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mb-2">💱</div>
                         <p data-i18n="toolCurrencyName" class="text-xs font-bold text-slate-800 dark:text-white">ငွေလဲနှုန်းတွက်စက်</p>
                         <p data-i18n="toolCurrencyDesc" class="text-[10px] text-slate-400 mt-0.5">MMK / USD / THB / SGD</p>
                     </button>
 
-                    <button onclick="scrollToTool('tool-notes')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                    <button onclick="scrollToTool('tool-notes')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card text-left hover:border-indigo-400 transition active:scale-[0.98]">
                         <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mb-2">🛒</div>
                         <p data-i18n="toolNotesName" class="text-xs font-bold text-slate-800 dark:text-white">ဈေးဝယ်မှတ်စု</p>
                         <p data-i18n="toolNotesDesc" class="text-[10px] text-slate-400 mt-0.5">Shopping & Todo List</p>
                     </button>
 
-                    <button onclick="scrollToTool('tool-backup')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                    <button onclick="scrollToTool('tool-backup')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-card text-left hover:border-indigo-400 transition active:scale-[0.98]">
                         <div class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg mb-2">📥</div>
                         <p data-i18n="toolBackupName" class="text-xs font-bold text-slate-800 dark:text-white">စာရင်းထုတ်ယူရန်</p>
                         <p data-i18n="toolBackupDesc" class="text-[10px] text-slate-400 mt-0.5">Export CSV / Backup</p>
@@ -451,7 +596,7 @@
                 </div>
 
                 <!-- 1. SAVINGS GOAL TRACKER -->
-                <section id="tool-savings" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                <section id="tool-savings" class="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-card border border-slate-100 dark:border-slate-700/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">🎯</span>
@@ -460,12 +605,11 @@
                         <button onclick="openSavingsModal()" data-i18n="editGoalBtn" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2.5 py-1 rounded-lg">ပန်းတိုင်ပြင်မည်</button>
                     </div>
 
-                    <div class="p-3.5 bg-slate-50 dark:bg-slate-900/70 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <div class="p-3.5 bg-slate-50 dark:bg-slate-900/70 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <div class="flex justify-between items-baseline mb-1.5">
                             <span id="goalTitleDisplay" class="text-xs font-bold text-slate-700 dark:text-slate-200">အရေးပေါ်စုငွေ (Emergency Fund)</span>
                             <span id="goalPercentDisplay" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">0%</span>
                         </div>
-                        <!-- Progress Bar -->
                         <div class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
                             <div id="goalProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
@@ -475,7 +619,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Add Savings Form -->
                     <div class="flex gap-2">
                         <input type="number" id="addSavingsInput" placeholder="10000" min="1" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         <button onclick="addSavingsAmount()" data-i18n="addSaveBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 transition">+ စုမည်</button>
@@ -483,7 +626,7 @@
                 </section>
 
                 <!-- 2. CURRENCY EXCHANGE CONVERTER -->
-                <section id="tool-currency" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                <section id="tool-currency" class="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-card border border-slate-100 dark:border-slate-700/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">💱</span>
@@ -521,7 +664,7 @@
                 </section>
 
                 <!-- 3. QUICK SHOPPING LIST / MEMO -->
-                <section id="tool-notes" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                <section id="tool-notes" class="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-card border border-slate-100 dark:border-slate-700/80 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">🛒</span>
@@ -539,7 +682,7 @@
                 </section>
 
                 <!-- 4. EXPORT & DATA BACKUP -->
-                <section id="tool-backup" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                <section id="tool-backup" class="bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-card border border-slate-100 dark:border-slate-700/80 space-y-3">
                     <div class="flex items-center gap-2">
                         <span class="text-lg">📥</span>
                         <h3 data-i18n="toolBackupName" class="text-sm font-bold text-slate-800 dark:text-white">စာရင်းထုတ်ယူရန် (Export Data)</h3>
@@ -554,26 +697,22 @@
 
             <!-- ==================== BOTTOM MENU NAVIGATION BAR ==================== -->
             <nav class="fixed bottom-0 left-0 right-0 flex justify-center z-40 pointer-events-none">
-                <div class="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 grid grid-cols-4 gap-1 pointer-events-auto shadow-lg">
-                    <!-- Menu 1: Money Tracker -->
+                <div class="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 px-3 py-2 grid grid-cols-4 gap-1 pointer-events-auto shadow-lg">
                     <button onclick="switchMainTab('tracker')" id="nav-tracker" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 transition">
                         <span class="text-lg leading-none mb-1">💰</span>
                         <span data-i18n="navTracker" class="text-[10px] font-bold">ငွေစာရင်း</span>
                     </button>
 
-                    <!-- Menu 2: Shop Inventory / Stock -->
                     <button onclick="switchMainTab('inventory')" id="nav-inventory" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                         <span class="text-lg leading-none mb-1">📦</span>
                         <span data-i18n="navInventory" class="text-[10px] font-bold">ကုန်ပစ္စည်း</span>
                     </button>
 
-                    <!-- Menu 3: Burmese & English Calendar -->
                     <button onclick="switchMainTab('calendar')" id="nav-calendar" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                         <span class="text-lg leading-none mb-1">📅</span>
                         <span data-i18n="navCalendar" class="text-[10px] font-bold">ပြက္ခဒိန်</span>
                     </button>
 
-                    <!-- Menu 4: Menu / Tools -->
                     <button onclick="switchMainTab('tools')" id="nav-tools" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                         <span class="text-lg leading-none mb-1">🧰</span>
                         <span data-i18n="navMenu" class="text-[10px] font-bold">မီနူး</span>
@@ -594,19 +733,16 @@
                     <button onclick="closeCalculatorModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-full text-slate-500 dark:text-slate-300">✕</button>
                 </div>
 
-                <!-- Display Screen -->
                 <div class="bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl mb-3 text-right border border-slate-200/70 dark:border-slate-700">
                     <div id="calcExpression" class="text-xs text-slate-400 h-4 truncate font-mono"></div>
                     <div id="calcDisplay" class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight truncate mt-1 font-mono">0</div>
                 </div>
 
-                <!-- Use Amount Action Button -->
                 <button onclick="useCalculatorResult()" class="w-full py-2.5 mb-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
                     <span>➕</span>
                     <span data-i18n="calcUseBtn">ရလဒ်ကို ငွေစာရင်းထဲ ထည့်သုံးမည်</span>
                 </button>
 
-                <!-- Keypad Grid -->
                 <div class="grid grid-cols-4 gap-2 text-base font-bold">
                     <button onclick="calcClear()" class="py-3 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 active:scale-95 transition">AC</button>
                     <button onclick="calcBackspace()" class="py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 active:scale-95 transition">⌫</button>
@@ -665,15 +801,15 @@
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <label data-i18n="prodStockLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">လက်ကျန်</label>
-                            <input type="number" id="prodStockInput" required min="0" value="0" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                            <input type="number" id="prodStockInput" required min="0" value="0" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
                         </div>
                         <div>
                             <label data-i18n="prodUnitLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">ယူနစ်</label>
-                            <input type="text" id="prodUnitInput" value="ခု" placeholder="ခု/ထုပ်/ဗူး" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                            <input type="text" id="prodUnitInput" value="ခု" placeholder="ခု/ထုပ်/ဗူး" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
                         </div>
                         <div>
                             <label data-i18n="prodLowAlertLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">သတိပေး</label>
-                            <input type="number" id="prodLowAlertInput" min="0" value="5" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                            <input type="number" id="prodLowAlertInput" min="0" value="5" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
                         </div>
                     </div>
 
@@ -715,7 +851,6 @@
                         <input type="text" id="moveNoteInput" placeholder="..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
                     </div>
 
-                    <!-- Auto-sync with Money Tracker Checkbox -->
                     <label class="flex items-center gap-2.5 p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800/40 cursor-pointer">
                         <input type="checkbox" id="moveSyncMoneyCheckbox" checked class="w-4 h-4 accent-indigo-600 rounded">
                         <span id="moveSyncMoneyText" class="text-xs font-semibold text-indigo-800 dark:text-indigo-200">ငွေစာရင်းထဲသို့ အလိုအလျောက် ထည့်သွင်းမည်</span>
@@ -739,7 +874,6 @@
                 </div>
 
                 <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                    <!-- Type Toggle -->
                     <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl">
                         <button type="button" id="typeExpenseBtn" onclick="setTransactionType('expense')" data-i18n="typeExpense" class="py-2.5 text-sm font-bold rounded-lg bg-rose-500 text-white shadow-sm transition">
                             ထွက်ငွေ (Expense)
@@ -749,7 +883,6 @@
                         </button>
                     </div>
 
-                    <!-- Amount Input -->
                     <div>
                         <label data-i18n="amountLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ငွေပမာဏ (MMK)</label>
                         <div class="relative">
@@ -759,27 +892,23 @@
                         </div>
                     </div>
 
-                    <!-- Category Selection -->
                     <div>
                         <label data-i18n="categoryLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">အမျိုးအစား ရွေးချယ်ပါ</label>
                         <div id="categoryGrid" class="grid grid-cols-3 gap-2"></div>
                     </div>
 
-                    <!-- Note / Description -->
                     <div>
                         <label data-i18n="noteLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">မှတ်ချက် (အကြောင်းအရာ)</label>
                         <input type="text" id="noteInput" placeholder="..." 
                             class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                     </div>
 
-                    <!-- Date Picker -->
                     <div>
                         <label data-i18n="dateLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ရက်စွဲ</label>
                         <input type="date" id="dateInput" required 
                             class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                     </div>
 
-                    <!-- Submit Button -->
                     <button type="submit" data-i18n="saveBtn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition mt-2">
                         သိမ်းဆည်းမည်
                     </button>
@@ -824,7 +953,6 @@
                     </button>
                 </div>
 
-                <!-- Account Info Box -->
                 <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-200/70 dark:border-slate-700 mb-4 flex items-center justify-between">
                     <div class="overflow-hidden">
                         <p id="settingsUserName" class="text-sm font-bold text-slate-800 dark:text-white truncate">Guest User</p>
@@ -833,7 +961,6 @@
                     <span id="settingsSyncStatus" class="text-[11px] px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">Local</span>
                 </div>
 
-                <!-- Theme & Language Quick Row -->
                 <div class="grid grid-cols-2 gap-2.5 mb-4">
                     <button onclick="toggleTheme()" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
                         <span class="theme-icon">🌙</span>
@@ -845,8 +972,11 @@
                     </button>
                 </div>
 
-                <!-- Data & Auth Actions -->
                 <div class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+                    <button onclick="openGoogleConfigFromSettings()" class="w-full py-2.5 px-4 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition">
+                        <span>🔑</span>
+                        <span data-i18n="googleConfigBtn">Google OAuth Client ID ပြင်ဆင်ရန်</span>
+                    </button>
                     <button onclick="clearAllData()" class="w-full py-2.5 px-4 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition">
                         <span>🗑️</span>
                         <span data-i18n="clearAllBtn">စာရင်းအားလုံး ဖျက်ပစ်မည် (0 MMK ပြန်ထားမည်)</span>
@@ -873,42 +1003,81 @@
         </div>
 
         <!-- Toast Notification -->
-        <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 whitespace-nowrap">
+        <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 whitespace-nowrap">
             Saved
         </div>
 
     </div>
 
-    <!-- Firebase SDK (Module) + App Logic -->
+    <!-- Firebase SDK (Module) + Google Identity Services + App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- FIREBASE SETUP ---
+        // --- FIREBASE & GOOGLE OAUTH SETUP ---
         let app = null, auth = null, db = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'money-tracker-mmk-v3';
         let unsubscribeSnapshot = null;
 
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                app = initializeApp(firebaseConfig);
+        function initFirebaseFromConfig(cfg) {
+            try {
+                if (!cfg || !cfg.apiKey) return false;
+                app = initializeApp(cfg);
                 auth = getAuth(app);
                 db = getFirestore(app);
+                return true;
+            } catch (err) {
+                console.warn("Firebase init skipped:", err);
+                return false;
             }
-        } catch (err) {
-            console.warn("Firebase config unavailable, running in local mode.");
+        }
+
+        // Check environment Firebase config or user-saved Firebase config
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            try { initFirebaseFromConfig(JSON.parse(__firebase_config)); } catch (e) {}
+        } else {
+            const savedFbCfg = localStorage.getItem('mm_tracker_v3_firebase_cfg');
+            if (savedFbCfg) {
+                try { initFirebaseFromConfig(JSON.parse(savedFbCfg)); } catch (e) {}
+            }
         }
 
         // --- TRANSLATIONS (MYANMAR & ENGLISH) ---
         const TRANSLATIONS = {
             my: {
+                splashTapHint: "ဆက်သွားရန် နှိပ်ပါ သို့မဟုတ် ခဏစောင့်ပါ...",
                 appTitle: "ငွေစာရင်းမှတ် App",
-                loginSubtitle: "သင်၏ နေ့စဉ် ဝင်ငွေ၊ ထွက်ငွေနှင့် မြန်မာပြက္ခဒိန်ကို တစ်နေရာတည်းတွင် စီမံခန့်ခွဲပါ",
-                googleBtn: "Google အကောင့်ဖြင့် ဝင်မည်",
+                loginSubtitle: "နေ့စဉ် ဝင်ငွေ/ထွက်ငွေ၊ ကုန်ပစ္စည်းစတော့နှင့် မြန်မာပြက္ခဒိန်",
+                signInTab: "Sign In (အကောင့်ဝင်ရန်)",
+                signUpTab: "Sign Up (အကောင့်သစ်)",
+                displayNameLabel: "အမည် (Display Name)",
+                usernameLabel: "Username",
+                usernameUniqueHint: "* တစ်ဦးသုံးပြီးသော Username ကို အခြားသူ ထပ်မံအသုံးပြု၍ မရပါ။",
+                passwordLabel: "Password",
+                confirmPasswordLabel: "Password အတည်ပြုရန်",
+                signInSubmitBtn: "Sign In ဝင်မည်",
+                signUpSubmitBtn: "အကောင့်သစ် ဖွင့်မည် (Sign Up)",
+                orDivider: "သို့မဟုတ်",
+                googleBtn: "Continue with Google",
+                googleModalTitle: "Google Sign-In ချိတ်ဆက်ရန်",
+                savedGoogleAccountsLabel: "ယခင်ဝင်ရောက်ထားသော Google အကောင့်",
+                googleSetupExplain: "သင့်ဖုန်း/Browser ထဲရှိ Gmail အကောင့်အစစ်များ အလိုအလျောက်ပေါ်လာပြီး နှိပ်ရုံဖြင့် ဝင်နိုင်ရန် Google OAuth Client ID (သို့) Firebase Config ကို တစ်ကြိမ်သာ ချိတ်ဆက်ပေးပါ။",
+                googleStep1: "Google Cloud Console (သို့) Firebase Console သို့သွားပါ။",
+                googleStep2: "Authorized JavaScript origins တွင် သင့် Website URL ကို ထည့်ပါ။",
+                googleStep3: "ရရှိလာသော Google Client ID ကို အောက်တွင် ထည့်ပြီး Save နှိပ်ပါ။",
+                googleClientIdLabel: "Google OAuth Client ID (သို့) Firebase Config JSON",
+                activateGoogleBtn: "Google Account Chooser ဖွင့်မည်",
+                googleConfigBtn: "Google OAuth Client ID ပြင်ဆင်ရန်",
                 guestBtn: "ဧည့်သည် (Guest) အဖြစ် ဆက်သုံးမည်",
-                loginNote: "Guest အဖြစ်သုံးပါက စာရင်းများကို ဤဖုန်းထဲတွင် သိမ်းဆည်းပေးပါမည်။",
+                loginNote: "အကောင့်တစ်ခုချင်းစီအတွက် စာရင်းများကို သီးခြားစီ လုံခြုံစွာ သိမ်းဆည်းပေးပါမည်။",
+                errUsernameTaken: "ဤ Username ကို အခြားသူ အသုံးပြုပြီး ဖြစ်ပါသည် (Username မှာ အသုံးပြုပြီးသားဖြစ်နေပါသည်)",
+                errInvalidCreds: "Username သို့မဟုတ် Password မှားယွင်းနေပါသည်",
+                errPwdMismatch: "Password နှစ်ခု မတူညီပါ",
+                errShortPwd: "Password သည် အနည်းဆုံး ၄ လုံး ရှိရပါမည်",
+                errInvalidUsername: "Username သည် အနည်းဆုံး ၃ လုံး ရှိရပါမည်",
+                signedUpToast: "အကောင့်သစ် ဖွင့်ပြီးပါပြီ ✓",
+                signedInToast: "အကောင့်ဝင်ရောက်ပြီးပါပြီ ✓",
                 navTracker: "ငွေစာရင်း",
                 navInventory: "ကုန်ပစ္စည်း",
                 navCalendar: "ပြက္ခဒိန်",
@@ -1015,11 +1184,38 @@
                 }
             },
             en: {
+                splashTapHint: "Tap to continue or wait a moment...",
                 appTitle: "Money Tracker",
-                loginSubtitle: "Manage your daily income, expenses, and Myanmar calendar in one place",
-                googleBtn: "Sign in with Google",
+                loginSubtitle: "Daily cashflow, shop inventory & Myanmar calendar",
+                signInTab: "Sign In",
+                signUpTab: "Sign Up",
+                displayNameLabel: "Display Name",
+                usernameLabel: "Username",
+                usernameUniqueHint: "* Once claimed, another user cannot register this username.",
+                passwordLabel: "Password",
+                confirmPasswordLabel: "Confirm Password",
+                signInSubmitBtn: "Sign In",
+                signUpSubmitBtn: "Create Account (Sign Up)",
+                orDivider: "OR",
+                googleBtn: "Continue with Google",
+                googleModalTitle: "Connect Google Sign-In",
+                savedGoogleAccountsLabel: "Previously Signed-In Google Accounts",
+                googleSetupExplain: "Connect your Google OAuth Client ID (or Firebase Web Config) once so your device's real Gmail accounts appear automatically for 1-tap sign-in.",
+                googleStep1: "Open Google Cloud Console or Firebase Console.",
+                googleStep2: "Add your site origin to Authorized JavaScript origins.",
+                googleStep3: "Paste your Google Client ID below and save.",
+                googleClientIdLabel: "Google OAuth Client ID (or Firebase Config JSON)",
+                activateGoogleBtn: "Activate Google Account Chooser",
+                googleConfigBtn: "Configure Google OAuth Client ID",
                 guestBtn: "Continue as Guest",
-                loginNote: "Guest data is saved locally on this device.",
+                loginNote: "Each account has its own isolated records saved securely.",
+                errUsernameTaken: "This username is already taken by another user.",
+                errInvalidCreds: "Invalid username or password.",
+                errPwdMismatch: "Passwords do not match.",
+                errShortPwd: "Password must be at least 4 characters.",
+                errInvalidUsername: "Username must be at least 3 characters.",
+                signedUpToast: "Account created ✓",
+                signedInToast: "Signed in ✓",
                 navTracker: "Tracker",
                 navInventory: "Inventory",
                 navCalendar: "Calendar",
@@ -1144,7 +1340,7 @@
             ]
         };
 
-        // --- TRADITIONAL BURMESE CALENDAR ENGINE (JDN-BASED LUNAR & YEAR CALCULATION) ---
+        // --- TRADITIONAL BURMESE CALENDAR ENGINE ---
         const MM_MONTHS = ["တန်ခူး", "ကဆုန်", "နယုန်", "ဝါဆို", "ဝါခေါင်", "တော်သလင်း", "သီတင်းကျွတ်", "တန်ဆောင်မုန်း", "နတ်တော်", "ပြာသို", "တပို့တွဲ", "တပေါင်း"];
         const MM_MONTHS_EN = ["Tagu", "Kason", "Nayon", "Waso", "Wagaung", "Tawthalin", "Thadingyut", "Tazaungmon", "Nadaw", "Pyatho", "Tabodwe", "Tabaung"];
         const MM_DIGITS = ["၀", "၁", "၂", "၃", "၄", "၅", "၆", "၇", "၈", "၉"];
@@ -1160,57 +1356,40 @@
             return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
         }
 
-        // Accurate Burmese Lunar Date Conversion (Anchored to verified Myanmar New Year & Lunar cycle)
-        // Reference: 2026-11-16 (JDN 2461361) = Myanmar Year 1388, Tazaungmon Waxing 7 (တန်ဆောင်မုန်းလဆန်း ၇ ရက်)
         function getBurmeseDateInfo(gYear, gMonth, gDay) {
             const jdn = gregorianToJDN(gYear, gMonth, gDay);
-            
-            // Myanmar Year calculation (Thingyan New Year around April 17)
             let myYear = gYear - 638;
             if (gMonth < 4 || (gMonth === 4 && gDay < 17)) {
                 myYear -= 1;
             }
-
-            // Anchor: 2026-11-10 is Tazaungmon Waxing 1 (JDN 2461355), month index 7 (တန်ဆောင်မုန်း)
-            const anchorJDN = 2461355; // 2026-11-10 = 1388 Tazaungmon Waxing 1
-            const anchorMonthIdx = 7;  // Tazaungmon
+            const anchorJDN = 2461355;
+            const anchorMonthIdx = 7;
             const synodicMonth = 29.530588853;
-
             const diffDays = jdn - anchorJDN;
-            // Estimate lunar months elapsed from anchor
             let approxMonths = Math.floor(diffDays / synodicMonth);
             let monthStartJDN = anchorJDN + Math.round(approxMonths * synodicMonth);
-            
             if (jdn < monthStartJDN) {
                 approxMonths -= 1;
                 monthStartJDN = anchorJDN + Math.round(approxMonths * synodicMonth);
             }
             const nextMonthStartJDN = anchorJDN + Math.round((approxMonths + 1) * synodicMonth);
-            const monthLength = nextMonthStartJDN - monthStartJDN; // 29 or 30 days
-            const dayInLunarMonth = (jdn - monthStartJDN) + 1; // 1 to 30
+            const monthLength = nextMonthStartJDN - monthStartJDN;
+            const dayInLunarMonth = (jdn - monthStartJDN) + 1;
 
-            // Handle 2026 Watat (Second Waso in 1388 ME: July/Aug 2026)
-            // For 1388 ME (April 2026 - April 2027), Second Waso occurred in mid-2026, so post-Waso months align directly
             let mIdx = ((anchorMonthIdx + approxMonths) % 12 + 12) % 12;
             let isSecondWaso = false;
-
-            // Check if date falls in 1388 Second Waso window (approx July 15 - Aug 12, 2026)
             if (gYear === 2026 && ((gMonth === 7 && gDay >= 15) || (gMonth === 8 && gDay <= 12))) {
-                mIdx = 3; // Waso
+                mIdx = 3;
                 isSecondWaso = true;
             }
 
-            let phaseMy = "";
-            let phaseEn = "";
-            let lunarDay = dayInLunarMonth;
-            let isFullMoon = false;
-            let isNewMoon = false;
-            let isSabbath = false;
+            let phaseMy = "", phaseEn = "";
+            let isFullMoon = false, isNewMoon = false, isSabbath = false;
 
             if (dayInLunarMonth < 15) {
-                phaseMy = `လဆန်း ${toMyanmarDigits(lunarDay)} ရက်`;
-                phaseEn = `Waxing ${lunarDay}`;
-                if (lunarDay === 8) isSabbath = true;
+                phaseMy = `လဆန်း ${toMyanmarDigits(dayInLunarMonth)} ရက်`;
+                phaseEn = `Waxing ${dayInLunarMonth}`;
+                if (dayInLunarMonth === 8) isSabbath = true;
             } else if (dayInLunarMonth === 15) {
                 phaseMy = "လပြည့်နေ့";
                 phaseEn = "Full Moon";
@@ -1228,10 +1407,8 @@
                 isSabbath = true;
             }
 
-            const monthPrefixMy = isSecondWaso ? "ဒုတိယ" : "";
-            const monthPrefixEn = isSecondWaso ? "2nd " : "";
-            const monthNameMy = `${monthPrefixMy}${MM_MONTHS[mIdx]}`;
-            const monthNameEn = `${monthPrefixEn}${MM_MONTHS_EN[mIdx]}`;
+            const monthNameMy = `${isSecondWaso ? "ဒုတိယ" : ""}${MM_MONTHS[mIdx]}`;
+            const monthNameEn = `${isSecondWaso ? "2nd " : ""}${MM_MONTHS_EN[mIdx]}`;
 
             return {
                 myYear,
@@ -1251,9 +1428,10 @@
         // --- GLOBAL APP STATE ---
         let currentLang = localStorage.getItem('mm_tracker_v3_lang') || 'my';
         let currentTheme = localStorage.getItem('mm_tracker_v3_theme') || 'light';
+        let authMode = 'signin';
         let currentUser = null;
-        let currentMainTab = 'tracker'; // 'tracker' | 'inventory' | 'calendar' | 'tools'
-        let transactions = []; // Starts completely empty (0 MMK)
+        let currentMainTab = 'tracker';
+        let transactions = [];
         let currentFilter = 'all';
         let selectedType = 'expense';
         let selectedCategory = 'food';
@@ -1290,11 +1468,33 @@
             return `${y}-${m}-${day}`;
         }
 
+        // --- SPLASH ANIMATION ---
+        let splashTimer = null;
+        window.dismissSplash = function() {
+            if (splashTimer) clearTimeout(splashTimer);
+            const splash = document.getElementById('splashOverlay');
+            if (!splash || splash.classList.contains('opacity-0')) return;
+            splash.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => splash.classList.add('hidden'), 450);
+        };
+
         // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
             applyTheme(currentTheme);
             applyLanguage(currentLang);
+            setAuthMode('signin');
             document.getElementById('dateInput').valueAsDate = new Date();
+            document.getElementById('currentOriginDisplay').textContent = window.location.origin;
+
+            // Purge any old mock sample accounts from earlier builds
+            localStorage.removeItem('mm_tracker_v3_google_accounts');
+
+            // Initialize Google Identity Services One-Tap if Client ID is configured
+            initGoogleIdentityServices();
+
+            splashTimer = setTimeout(() => {
+                dismissSplash();
+            }, 1350);
 
             const savedSession = localStorage.getItem('mm_tracker_v3_user');
             if (savedSession) {
@@ -1309,80 +1509,324 @@
             }
         });
 
-        // --- NAVIGATION TABS (MENU SECTION) ---
-        window.switchMainTab = function(tabName) {
-            currentMainTab = tabName;
-            ['tracker', 'inventory', 'calendar', 'tools'].forEach(tName => {
-                const viewEl = document.getElementById(`view-${tName}`);
-                const navBtn = document.getElementById(`nav-${tName}`);
-                if (tName === tabName) {
-                    viewEl.classList.remove('hidden');
-                    navBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 transition';
-                } else {
-                    viewEl.classList.add('hidden');
-                    navBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+        // --- GOOGLE IDENTITY SERVICES (OFFICIAL ONE-TAP & ACCOUNT CHOOSER) ---
+        function getGoogleClientId() {
+            return (localStorage.getItem('mm_tracker_v3_google_client_id') || '').trim();
+        }
+
+        function decodeJwtPayload(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                ).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function initGoogleIdentityServices() {
+            const clientId = getGoogleClientId();
+            if (!clientId || !window.google || !window.google.accounts || !window.google.accounts.id) return;
+
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: (response) => {
+                        const profile = decodeJwtPayload(response.credential);
+                        if (profile && profile.email) {
+                            recordRealGoogleAccount(profile.name || profile.email.split('@')[0], profile.email, profile.picture || null);
+                            completeGoogleSignIn(profile.name || profile.email.split('@')[0], profile.email, profile.picture || null);
+                        }
+                    },
+                    auto_select: false,
+                    cancel_on_tap_outside: true
+                });
+
+                const btnWrapper = document.getElementById('gsiNativeButtonWrapper');
+                btnWrapper.classList.remove('hidden');
+                window.google.accounts.id.renderButton(btnWrapper, {
+                    theme: currentTheme === 'dark' ? 'filled_black' : 'outline',
+                    size: 'large',
+                    text: 'continue_with',
+                    shape: 'pill',
+                    width: 310
+                });
+            } catch (e) {
+                console.warn("GSI init warning:", e);
+            }
+        }
+
+        function getRealSavedGoogleAccounts() {
+            try {
+                return JSON.parse(localStorage.getItem('mm_tracker_v3_real_google_users') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function recordRealGoogleAccount(name, email, picture) {
+            const list = getRealSavedGoogleAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase());
+            list.unshift({ name, email, picture });
+            localStorage.setItem('mm_tracker_v3_real_google_users', JSON.stringify(list));
+        }
+
+        window.handleContinueWithGoogle = async function() {
+            // 1. If Firebase Auth is active, trigger official Firebase Google Account Chooser popup
+            if (auth) {
+                try {
+                    const provider = new GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
+                    const result = await signInWithPopup(auth, provider);
+                    const user = result.user;
+                    const gEmail = user.email;
+                    const gName = user.displayName || gEmail.split('@')[0];
+                    recordRealGoogleAccount(gName, gEmail, user.photoURL || null);
+                    completeGoogleSignIn(gName, gEmail, user.photoURL || null);
+                    return;
+                } catch (err) {
+                    if (err.code === 'auth/popup-closed-by-user') return;
                 }
-            });
+            }
 
-            if (tabName === 'tracker') renderApp();
-            if (tabName === 'inventory') renderInventory();
-            if (tabName === 'calendar') renderCalendar();
-            if (tabName === 'tools') renderTools();
+            // 2. If Google OAuth Client ID is saved, trigger Google One-Tap / Account Chooser prompt
+            const clientId = getGoogleClientId();
+            if (clientId && window.google?.accounts?.id) {
+                initGoogleIdentityServices();
+                window.google.accounts.id.prompt();
+                return;
+            }
+
+            // 3. Otherwise show real Google OAuth connection & previously signed-in real accounts modal (zero fake names)
+            openGoogleConnectModal();
         };
 
-        // --- THEME & LANGUAGE TOGGLES ---
-        window.toggleTheme = function() {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('mm_tracker_v3_theme', currentTheme);
-            applyTheme(currentTheme);
-            if (currentUser && currentMainTab === 'tracker') renderApp();
-        };
+        window.openGoogleConnectModal = function() {
+            const realSaved = getRealSavedGoogleAccounts();
+            const sec = document.getElementById('previouslySignedGoogleSection');
+            const listEl = document.getElementById('realGoogleAccountsList');
 
-        function applyTheme(theme) {
-            const html = document.documentElement;
-            if (theme === 'dark') {
-                html.classList.add('dark');
-                document.querySelectorAll('.theme-icon').forEach(el => el.textContent = '☀️');
-                document.getElementById('settingsThemeText').textContent = 'Light Mode';
+            if (realSaved.length > 0) {
+                sec.classList.remove('hidden');
+                listEl.innerHTML = realSaved.map(acc => `
+                    <button type="button" onclick="quickContinueRealGoogle('${acc.name.replace(/'/g, "\\'")}', '${acc.email.replace(/'/g, "\\'")}', '${(acc.picture || '').replace(/'/g, "\\'")}')"
+                        class="w-full p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700 flex items-center gap-3 text-left transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden">
+                            ${acc.picture ? `<img src="${acc.picture}" class="w-full h-full object-cover">` : acc.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="overflow-hidden flex-1">
+                            <p class="text-xs font-bold text-slate-800 dark:text-white truncate">Continue as ${acc.name}</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${acc.email}</p>
+                        </div>
+                        <span class="text-xs text-indigo-600 font-bold">›</span>
+                    </button>
+                `).join('');
             } else {
-                html.classList.remove('dark');
-                document.querySelectorAll('.theme-icon').forEach(el => el.textContent = '🌙');
-                document.getElementById('settingsThemeText').textContent = 'Dark Mode';
+                sec.classList.add('hidden');
+            }
+
+            document.getElementById('googleClientIdInput').value = getGoogleClientId();
+            document.getElementById('googleConnectModal').classList.remove('hidden');
+        };
+
+        window.closeGoogleConnectModal = function() {
+            document.getElementById('googleConnectModal').classList.add('hidden');
+        };
+
+        window.openGoogleConfigFromSettings = function() {
+            closeSettingsModal();
+            openGoogleConnectModal();
+        };
+
+        window.quickContinueRealGoogle = function(name, email, picture) {
+            closeGoogleConnectModal();
+            completeGoogleSignIn(name, email, picture || null);
+        };
+
+        window.saveGoogleOAuthConfig = function(e) {
+            e.preventDefault();
+            const raw = document.getElementById('googleClientIdInput').value.trim();
+            if (!raw) return;
+
+            // Check if user pasted Firebase JSON config vs Google OAuth Client ID string
+            if (raw.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (initFirebaseFromConfig(parsed)) {
+                        localStorage.setItem('mm_tracker_v3_firebase_cfg', JSON.stringify(parsed));
+                        closeGoogleConnectModal();
+                        handleContinueWithGoogle();
+                        return;
+                    }
+                } catch (err) {
+                    showToast(currentLang === 'my' ? 'Firebase Config JSON ပုံစံ မှားနေပါသည်' : 'Invalid Firebase JSON format');
+                    return;
+                }
+            }
+
+            localStorage.setItem('mm_tracker_v3_google_client_id', raw);
+            closeGoogleConnectModal();
+            initGoogleIdentityServices();
+            if (window.google?.accounts?.id) {
+                window.google.accounts.id.prompt();
+            }
+            showToast(currentLang === 'my' ? 'Google Client ID ချိတ်ဆက်ပြီးပါပြီ ✓' : 'Google Client ID saved ✓');
+        };
+
+        function completeGoogleSignIn(name, email, photoURL) {
+            const safeUid = 'google_' + email.replace(/[^a-zA-Z0-9]/g, '_');
+            currentUser = {
+                mode: 'google',
+                uid: safeUid,
+                name: name,
+                email: email,
+                photoURL: photoURL
+            };
+            localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
+            enterMainApp();
+            showToast(`${email} ✓`);
+        }
+
+        // --- AUTH MODE (SIGN IN / SIGN UP WITH UNIQUE USERNAME) ---
+        function getRegisteredAccounts() {
+            try {
+                const raw = localStorage.getItem('mm_tracker_v3_accounts');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
             }
         }
 
-        window.toggleLanguage = function() {
-            currentLang = currentLang === 'my' ? 'en' : 'my';
-            localStorage.setItem('mm_tracker_v3_lang', currentLang);
-            applyLanguage(currentLang);
-            if (currentUser) {
-                renderCategoryGrid();
-                renderApp();
-                renderInventory();
-                renderCalendar();
-                renderTools();
+        function saveRegisteredAccounts(accounts) {
+            localStorage.setItem('mm_tracker_v3_accounts', JSON.stringify(accounts));
+        }
+
+        window.setAuthMode = function(mode) {
+            authMode = mode;
+            const signInTab = document.getElementById('authTabSignIn');
+            const signUpTab = document.getElementById('authTabSignUp');
+            const nameGroup = document.getElementById('signupNameGroup');
+            const confirmGroup = document.getElementById('signupConfirmGroup');
+            const uniqueHint = document.getElementById('usernameUniqueHint');
+            const submitBtn = document.getElementById('credSubmitBtn');
+            const feedbackBox = document.getElementById('authFeedbackBox');
+
+            feedbackBox.classList.add('hidden');
+
+            if (mode === 'signup') {
+                signUpTab.className = 'py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                signInTab.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 dark:text-slate-400 transition';
+                nameGroup.classList.remove('hidden');
+                confirmGroup.classList.remove('hidden');
+                uniqueHint.classList.remove('hidden');
+                document.getElementById('authConfirmPasswordInput').required = true;
+                submitBtn.textContent = t('signUpSubmitBtn');
+            } else {
+                signInTab.className = 'py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                signUpTab.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 dark:text-slate-400 transition';
+                nameGroup.classList.add('hidden');
+                confirmGroup.classList.add('hidden');
+                uniqueHint.classList.add('hidden');
+                document.getElementById('authConfirmPasswordInput').required = false;
+                submitBtn.textContent = t('signInSubmitBtn');
             }
         };
 
-        function applyLanguage(lang) {
-            const tObj = TRANSLATIONS[lang];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (tObj[key]) el.textContent = tObj[key];
-            });
-            document.getElementById('searchInput').placeholder = tObj.searchPlaceholder;
-            document.getElementById('noteInput').placeholder = tObj.notePlaceholder;
-            document.getElementById('invSearchInput').placeholder = lang === 'my' ? 'ပစ္စည်းအမည် ရှာရန်...' : 'Search product name...';
-            document.getElementById('quickNoteInput').placeholder = lang === 'my' ? 'ဝယ်ရန်ပစ္စည်း (သို့) မှတ်စုရေးပါ...' : 'Add shopping item or memo...';
-            document.getElementById('headerLangCode').textContent = lang === 'my' ? 'EN' : 'မြန်မာ';
-            document.getElementById('settingsLangText').textContent = lang === 'my' ? 'English' : 'မြန်မာစာ';
+        window.toggleAuthPasswordVisibility = function() {
+            const input = document.getElementById('authPasswordInput');
+            const icon = document.getElementById('pwdEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️';
+            }
+        };
+
+        function showAuthError(msg) {
+            const box = document.getElementById('authFeedbackBox');
+            box.className = 'mb-3 p-2.5 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60';
+            box.textContent = msg;
+            box.classList.remove('hidden');
         }
 
-        function t(key) {
-            return TRANSLATIONS[currentLang][key] || key;
-        }
+        window.handleCredentialAuth = function(e) {
+            e.preventDefault();
+            const rawUsername = document.getElementById('authUsernameInput').value.trim();
+            const normalizedUsername = rawUsername.toLowerCase();
+            const password = document.getElementById('authPasswordInput').value;
+            const accounts = getRegisteredAccounts();
 
-        // --- AUTHENTICATION (GOOGLE & GUEST) ---
+            if (normalizedUsername.length < 3) {
+                showAuthError(t('errInvalidUsername'));
+                return;
+            }
+            if (password.length < 4) {
+                showAuthError(t('errShortPwd'));
+                return;
+            }
+
+            if (authMode === 'signup') {
+                const exists = accounts.some(acc => acc.usernameKey === normalizedUsername);
+                if (exists) {
+                    showAuthError(t('errUsernameTaken'));
+                    return;
+                }
+
+                const confirmPwd = document.getElementById('authConfirmPasswordInput').value;
+                if (password !== confirmPwd) {
+                    showAuthError(t('errPwdMismatch'));
+                    return;
+                }
+
+                const displayName = document.getElementById('authDisplayNameInput').value.trim() || rawUsername;
+                const newAccount = {
+                    uid: `user_${normalizedUsername}`,
+                    username: rawUsername,
+                    usernameKey: normalizedUsername,
+                    displayName: displayName,
+                    password: password,
+                    createdAt: new Date().toISOString()
+                };
+
+                accounts.push(newAccount);
+                saveRegisteredAccounts(accounts);
+
+                currentUser = {
+                    mode: 'username',
+                    uid: newAccount.uid,
+                    username: newAccount.username,
+                    name: newAccount.displayName,
+                    email: `@${newAccount.username}`,
+                    photoURL: null
+                };
+                localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
+                enterMainApp();
+                showToast(t('signedUpToast'));
+            } else {
+                const matched = accounts.find(acc => acc.usernameKey === normalizedUsername && acc.password === password);
+                if (!matched) {
+                    showAuthError(t('errInvalidCreds'));
+                    return;
+                }
+
+                currentUser = {
+                    mode: 'username',
+                    uid: matched.uid,
+                    username: matched.username,
+                    name: matched.displayName,
+                    email: `@${matched.username}`,
+                    photoURL: null
+                };
+                localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
+                enterMainApp();
+                showToast(t('signedInToast'));
+            }
+        };
+
         window.continueAsGuest = function() {
             currentUser = {
                 mode: 'guest',
@@ -1393,43 +1837,6 @@
             };
             localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
             enterMainApp();
-        };
-
-        window.signInWithGoogle = async function() {
-            const btn = document.getElementById('googleLoginBtn');
-            btn.disabled = true;
-            btn.classList.add('opacity-70');
-
-            try {
-                if (auth) {
-                    const provider = new GoogleAuthProvider();
-                    const result = await signInWithPopup(auth, provider);
-                    const user = result.user;
-                    currentUser = {
-                        mode: 'google',
-                        uid: user.uid,
-                        name: user.displayName || 'Google User',
-                        email: user.email || '',
-                        photoURL: user.photoURL || null
-                    };
-                } else {
-                    throw new Error("Auth not initialized");
-                }
-            } catch (error) {
-                currentUser = {
-                    mode: 'google',
-                    uid: 'google_v3_user',
-                    name: 'Google User',
-                    email: 'user@gmail.com',
-                    photoURL: null
-                };
-                showToast(currentLang === 'my' ? 'Google အကောင့်ဖြင့် ဝင်ရောက်ပြီးပါပြီ' : 'Signed in with Google');
-            } finally {
-                btn.disabled = false;
-                btn.classList.remove('opacity-70');
-                localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
-                enterMainApp();
-            }
         };
 
         window.handleLogout = async function() {
@@ -1457,19 +1864,20 @@
             document.getElementById('mainAppScreen').classList.remove('hidden');
 
             const isGoogle = currentUser.mode === 'google';
+            const isCred = currentUser.mode === 'username';
             document.getElementById('userDisplayName').textContent = currentUser.name;
             document.getElementById('userEmailDisplay').textContent = currentUser.email;
-            document.getElementById('userModeBadge').textContent = isGoogle ? 'Google' : 'Guest';
+            document.getElementById('userModeBadge').textContent = isGoogle ? 'Google' : (isCred ? 'Account' : 'Guest');
             
             document.getElementById('settingsUserName').textContent = currentUser.name;
             document.getElementById('settingsUserSub').textContent = currentUser.email;
-            document.getElementById('settingsSyncStatus').textContent = isGoogle ? 'Cloud Sync' : 'Local';
+            document.getElementById('settingsSyncStatus').textContent = isGoogle ? 'Google' : (isCred ? 'Account' : 'Local');
 
             const avatarEl = document.getElementById('userAvatar');
             if (currentUser.photoURL) {
                 avatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar" class="w-full h-full object-cover">`;
             } else {
-                avatarEl.textContent = isGoogle ? currentUser.name.charAt(0).toUpperCase() : '👤';
+                avatarEl.textContent = (isGoogle || isCred) ? currentUser.name.charAt(0).toUpperCase() : '👤';
             }
 
             renderCategoryGrid();
@@ -1479,7 +1887,82 @@
             switchMainTab('tracker');
         }
 
-        // --- DATA PERSISTENCE (CLEAN 0 MMK START - NO SAMPLE DATA) ---
+        // --- NAVIGATION TABS ---
+        window.switchMainTab = function(tabName) {
+            currentMainTab = tabName;
+            ['tracker', 'inventory', 'calendar', 'tools'].forEach(tName => {
+                const viewEl = document.getElementById(`view-${tName}`);
+                const navBtn = document.getElementById(`nav-${tName}`);
+                if (tName === tabName) {
+                    viewEl.classList.remove('hidden');
+                    navBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 transition';
+                } else {
+                    viewEl.classList.add('hidden');
+                    navBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+                }
+            });
+
+            if (tabName === 'tracker') renderApp();
+            if (tabName === 'inventory') renderInventory();
+            if (tabName === 'calendar') renderCalendar();
+            if (tabName === 'tools') renderTools();
+        };
+
+        // --- THEME & LANGUAGE TOGGLES ---
+        window.toggleTheme = function() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('mm_tracker_v3_theme', currentTheme);
+            applyTheme(currentTheme);
+            initGoogleIdentityServices();
+            if (currentUser && currentMainTab === 'tracker') renderApp();
+        };
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                document.querySelectorAll('.theme-icon').forEach(el => el.textContent = '☀️');
+                document.getElementById('settingsThemeText').textContent = 'Light Mode';
+            } else {
+                html.classList.remove('dark');
+                document.querySelectorAll('.theme-icon').forEach(el => el.textContent = '🌙');
+                document.getElementById('settingsThemeText').textContent = 'Dark Mode';
+            }
+        }
+
+        window.toggleLanguage = function() {
+            currentLang = currentLang === 'my' ? 'en' : 'my';
+            localStorage.setItem('mm_tracker_v3_lang', currentLang);
+            applyLanguage(currentLang);
+            setAuthMode(authMode);
+            if (currentUser) {
+                renderCategoryGrid();
+                renderApp();
+                renderInventory();
+                renderCalendar();
+                renderTools();
+            }
+        };
+
+        function applyLanguage(lang) {
+            const tObj = TRANSLATIONS[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (tObj[key]) el.textContent = tObj[key];
+            });
+            document.getElementById('searchInput').placeholder = tObj.searchPlaceholder;
+            document.getElementById('noteInput').placeholder = tObj.notePlaceholder;
+            document.getElementById('invSearchInput').placeholder = lang === 'my' ? 'ပစ္စည်းအမည် ရှာရန်...' : 'Search product name...';
+            document.getElementById('quickNoteInput').placeholder = lang === 'my' ? 'ဝယ်ရန်ပစ္စည်း (သို့) မှတ်စုရေးပါ...' : 'Add shopping item or memo...';
+            document.getElementById('headerLangCode').textContent = lang === 'my' ? 'EN' : 'မြန်မာ';
+            document.getElementById('settingsLangText').textContent = lang === 'my' ? 'English' : 'မြန်မာစာ';
+        }
+
+        function t(key) {
+            return TRANSLATIONS[currentLang][key] || key;
+        }
+
+        // --- DATA PERSISTENCE ---
         function getStorageKey() {
             return `mm_tracker_v3_tx_${currentUser?.uid || 'guest'}`;
         }
@@ -1489,20 +1972,7 @@
                 unsubscribeSnapshot();
                 unsubscribeSnapshot = null;
             }
-
-            if (db && auth?.currentUser && currentUser.mode === 'google') {
-                const txCol = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
-                unsubscribeSnapshot = onSnapshot(txCol, (snapshot) => {
-                    transactions = [];
-                    snapshot.forEach(docSnap => {
-                        transactions.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-                    renderApp();
-                    if (currentMainTab === 'calendar') renderCalendar();
-                }, () => loadLocalTransactions());
-            } else {
-                loadLocalTransactions();
-            }
+            loadLocalTransactions();
         }
 
         function loadLocalTransactions() {
@@ -1515,19 +1985,12 @@
                     transactions = [];
                 }
             } else {
-                transactions = []; // Clean 0 MMK start
+                transactions = [];
             }
             renderApp();
         }
 
         async function saveTransactionItem(tx) {
-            if (db && auth?.currentUser && currentUser.mode === 'google') {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions', String(tx.id));
-                    await setDoc(docRef, tx);
-                    return;
-                } catch (e) {}
-            }
             transactions.push(tx);
             localStorage.setItem(getStorageKey(), JSON.stringify(transactions));
             renderApp();
@@ -1535,13 +1998,6 @@
         }
 
         async function removeTransactionItem(id) {
-            if (db && auth?.currentUser && currentUser.mode === 'google') {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions', String(id));
-                    await deleteDoc(docRef);
-                    return;
-                } catch (e) {}
-            }
             transactions = transactions.filter(t => String(t.id) !== String(id));
             localStorage.setItem(getStorageKey(), JSON.stringify(transactions));
             renderApp();
@@ -1551,11 +2007,6 @@
         window.clearAllData = function() {
             closeSettingsModal();
             showConfirm(t('confirmClearTitle'), t('confirmClearMsg'), async () => {
-                if (db && auth?.currentUser && currentUser.mode === 'google') {
-                    for (const item of transactions) {
-                        await removeTransactionItem(item.id);
-                    }
-                }
                 transactions = [];
                 localStorage.setItem(getStorageKey(), JSON.stringify([]));
                 renderApp();
@@ -1596,9 +2047,9 @@
             ['all', 'income', 'expense'].forEach(tab => {
                 const btn = document.getElementById(`tab-${tab}`);
                 if (tab === filter) {
-                    btn.className = 'py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                    btn.className = 'py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
                 } else {
-                    btn.className = 'py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                    btn.className = 'py-1.5 text-xs font-bold rounded-xl text-slate-600 dark:text-slate-400 transition';
                 }
             });
             renderApp();
@@ -1628,7 +2079,7 @@
 
             const balanceEl = document.getElementById('totalBalance');
             balanceEl.textContent = formatMMK(balance);
-            balanceEl.className = `text-3xl font-bold tracking-tight ${balance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-white'}`;
+            balanceEl.className = `text-3xl font-extrabold tracking-tight ${balance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-white'}`;
             
             document.getElementById('totalIncome').textContent = (income > 0 ? '+' : '') + formatMMK(income);
             document.getElementById('totalExpense').textContent = (expense > 0 ? '-' : '') + formatMMK(expense);
@@ -1655,9 +2106,9 @@
 
             if (list.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 text-center border border-slate-100 dark:border-slate-700/80">
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 text-center border border-slate-100 dark:border-slate-700/80 shadow-card">
                         <div class="text-4xl mb-2">📝</div>
-                        <p class="text-sm font-semibold text-slate-600 dark:text-slate-300">${t('emptyListTitle')}</p>
+                        <p class="text-sm font-bold text-slate-600 dark:text-slate-300">${t('emptyListTitle')}</p>
                         <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${t('emptyListSub')}</p>
                     </div>
                 `;
@@ -1671,9 +2122,9 @@
                 const sign = isIncome ? '+' : '-';
 
                 return `
-                    <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl shadow-xs border border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 transition">
+                    <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl shadow-card border border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 transition">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style="background-color: ${cat.color}20;">
+                            <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: ${cat.color}20;">
                                 ${cat.icon}
                             </div>
                             <div class="overflow-hidden">
@@ -1686,7 +2137,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-sm font-bold ${amountClass}">${sign}${Number(item.amount).toLocaleString('en-US')}</span>
+                            <span class="text-sm font-extrabold ${amountClass}">${sign}${Number(item.amount).toLocaleString('en-US')}</span>
                             <button onclick="deleteTransaction('${item.id}')" class="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1794,17 +2245,15 @@
 
         window.renderCalendar = function() {
             const year = calViewDate.getFullYear();
-            const month = calViewDate.getMonth(); // 0-11
+            const month = calViewDate.getMonth();
             const todayStr = formatDateYMD(new Date());
 
-            // Today summary badge
             const now = new Date();
             const todayMm = getBurmeseDateInfo(now.getFullYear(), now.getMonth() + 1, now.getDate());
             document.getElementById('calTodayBadge').textContent = currentLang === 'my'
                 ? `ယနေ့: ${todayMm.myYearStr} ${todayMm.monthNameMy}${todayMm.phaseMy}`
                 : `Today: ${todayMm.myYear} ${todayMm.monthNameEn}, ${todayMm.phaseEn}`;
 
-            // Header English & Burmese Month Range
             const firstMm = getBurmeseDateInfo(year, month + 1, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const lastMm = getBurmeseDateInfo(year, month + 1, daysInMonth);
@@ -1822,23 +2271,19 @@
                 ? `မြန်မာသက္ကရာဇ် ${firstMm.myYearStr} ခုနှစ်၊ ${mmMonthsJoinedMy}`
                 : `Myanmar Era ${firstMm.myYear} • ${mmMonthsJoinedEn}`;
 
-            // Weekdays Header
             const wHeaders = TRANSLATIONS[currentLang].weekdaysShort;
             document.getElementById('calWeekdays').innerHTML = wHeaders.map((w, idx) => 
                 `<span class="${(idx === 0 || idx === 6) ? 'text-rose-500' : ''}">${w}</span>`
             ).join('');
 
-            // Build Grid Cells
             const firstWeekday = new Date(year, month, 1).getDay();
             const grid = document.getElementById('calDaysGrid');
             let cellsHtml = '';
 
-            // Leading blank cells
             for (let i = 0; i < firstWeekday; i++) {
                 cellsHtml += `<div class="h-12"></div>`;
             }
 
-            // Dates recorded map for dots
             const txDateSet = new Set(transactions.map(tx => tx.date));
 
             for (let day = 1; day <= daysInMonth; day++) {
@@ -1884,8 +2329,6 @@
                 `;
             }
             grid.innerHTML = cellsHtml;
-
-            // Update Selected Date Detail Box
             renderSelectedDateDetails();
         };
 
@@ -1914,7 +2357,6 @@
                 astroBadge.classList.add('hidden');
             }
 
-            // Transactions on selected date
             const dayTxs = transactions.filter(tx => tx.date === calSelectedDateStr);
             const listEl = document.getElementById('selectedDateTxList');
             if (dayTxs.length === 0) {
@@ -1962,7 +2404,6 @@
         };
 
         window.renderTools = function() {
-            // Render Savings Goal
             document.getElementById('goalTitleDisplay').textContent = savingsGoal.title;
             document.getElementById('goalSavedDisplay').textContent = formatMMK(savingsGoal.saved);
             document.getElementById('goalTargetDisplay').textContent = formatMMK(savingsGoal.target);
@@ -1970,7 +2411,6 @@
             document.getElementById('goalPercentDisplay').textContent = `${pct}%`;
             document.getElementById('goalProgressBar').style.width = `${pct}%`;
 
-            // Render Quick Notes
             document.getElementById('notesCountBadge').textContent = `${quickNotes.length}`;
             const notesContainer = document.getElementById('quickNotesList');
             if (quickNotes.length === 0) {
@@ -1990,7 +2430,6 @@
             }
         };
 
-        // Savings Actions
         window.addSavingsAmount = function() {
             const input = document.getElementById('addSavingsInput');
             const val = parseFloat(input.value);
@@ -2022,7 +2461,6 @@
             showToast(t('toastSaved'));
         };
 
-        // Currency Converter Actions
         window.onCurrencySelectChange = function() {
             const curr = document.getElementById('currencySelect').value;
             document.getElementById('exchangeRateInput').value = currencyRates[curr] || 1;
@@ -2042,7 +2480,6 @@
             document.getElementById('foreignAmountInput').value = (mmkAmt / rate).toFixed(2);
         };
 
-        // Quick Notes Actions
         window.addQuickNote = function(e) {
             e.preventDefault();
             const input = document.getElementById('quickNoteInput');
@@ -2064,7 +2501,6 @@
             renderTools();
         };
 
-        // Export CSV
         window.exportTransactionsCSV = function() {
             if (transactions.length === 0) {
                 showToast(currentLang === 'my' ? 'ထုတ်ယူရန် စာရင်းမရှိသေးပါ' : 'No transactions to export');
@@ -2079,9 +2515,8 @@
                 `"${(tx.note || '').replace(/"/g, '""')}"`
             ]);
             const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-            const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');
-            link.setAttribute('href', encodedUri);
+            link.setAttribute('href', encodeURI(csvContent));
             link.setAttribute('download', `money_tracker_${formatDateYMD(new Date())}.csv`);
             document.body.appendChild(link);
             link.click();
@@ -2328,13 +2763,13 @@
             const prodBtn = document.getElementById('inv-subtab-products');
             const logBtn = document.getElementById('inv-subtab-logs');
             if (sub === 'products') {
-                prodBtn.className = 'py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
-                logBtn.className = 'py-1.5 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                prodBtn.className = 'py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                logBtn.className = 'py-1.5 text-xs font-bold rounded-xl text-slate-600 dark:text-slate-400 transition';
                 document.getElementById('invProductsSection').classList.remove('hidden');
                 document.getElementById('invLogsSection').classList.add('hidden');
             } else {
-                logBtn.className = 'py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
-                prodBtn.className = 'py-1.5 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                logBtn.className = 'py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                prodBtn.className = 'py-1.5 text-xs font-bold rounded-xl text-slate-600 dark:text-slate-400 transition';
                 document.getElementById('invLogsSection').classList.remove('hidden');
                 document.getElementById('invProductsSection').classList.add('hidden');
             }
@@ -2353,7 +2788,6 @@
         };
 
         window.renderInventory = function() {
-            // Update KPI Metrics
             const totalTypes = inventoryProducts.length;
             let totalUnits = 0;
             let totalSellVal = 0;
@@ -2371,14 +2805,13 @@
             document.getElementById('invLowStockCount').textContent = lowStockItems;
             document.getElementById('invTotalValueAmount').textContent = formatMMK(totalSellVal);
 
-            // Render Product Cards
             const query = (document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
             const filteredProds = inventoryProducts.filter(p => !query || p.name.toLowerCase().includes(query));
             const prodListEl = document.getElementById('invProductList');
 
             if (filteredProds.length === 0) {
                 prodListEl.innerHTML = `
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 text-center border border-slate-100 dark:border-slate-700/80">
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 text-center border border-slate-100 dark:border-slate-700/80 shadow-card">
                         <div class="text-4xl mb-2">📦</div>
                         <p class="text-sm font-bold text-slate-600 dark:text-slate-300">${currentLang === 'my' ? 'ကုန်ပစ္စည်းစာရင်း မရှိသေးပါ' : 'No products added yet'}</p>
                         <p class="text-xs text-slate-400 mt-1">${currentLang === 'my' ? 'အပေါ်ညာဘက်ရှိ "+ ပစ္စည်းသစ်" ကိုနှိပ်ပြီး စာရင်းသွင်းပါ' : 'Tap "+ New Item" above to add shop items'}</p>
@@ -2389,7 +2822,7 @@
                     const isLow = Number(p.stock) <= Number(p.lowAlert || 0);
                     const profitPerUnit = (Number(p.sellPrice) || 0) - (Number(p.buyPrice) || 0);
                     return `
-                        <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border ${isLow ? 'border-rose-300 dark:border-rose-800/70' : 'border-slate-100 dark:border-slate-700/80'} shadow-xs space-y-2.5">
+                        <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border ${isLow ? 'border-rose-300 dark:border-rose-800/70' : 'border-slate-100 dark:border-slate-700/80'} shadow-card space-y-2.5">
                             <div class="flex justify-between items-start gap-2">
                                 <div class="overflow-hidden">
                                     <div class="flex items-center gap-1.5">
@@ -2405,7 +2838,7 @@
                                     </div>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <span class="text-base font-bold ${isLow ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-white'}">${p.stock}</span>
+                                    <span class="text-base font-extrabold ${isLow ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-white'}">${p.stock}</span>
                                     <span class="text-[11px] text-slate-400 ml-0.5">${p.unit || ''}</span>
                                     <div class="flex justify-end gap-1 mt-1">
                                         <button onclick="openProductModal('${p.id}')" class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">✎</button>
@@ -2414,7 +2847,6 @@
                                 </div>
                             </div>
 
-                            <!-- Quick Stock In / Out Action Buttons -->
                             <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/70">
                                 <button onclick="openStockMoveModal('${p.id}', 'in')" class="py-2 px-3 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1 active:scale-95 transition">
                                     <span>+</span>
@@ -2430,7 +2862,6 @@
                 }).join('');
             }
 
-            // Render Stock Movement Logs
             const filteredLogs = stockLogs.filter(l => stockLogFilter === 'all' || l.type === stockLogFilter);
             const logListEl = document.getElementById('invStockLogList');
             if (filteredLogs.length === 0) {
@@ -2464,7 +2895,6 @@
             }
         };
 
-        // Product Add/Edit Modal Handlers
         window.openProductModal = function(prodId = null) {
             const modal = document.getElementById('productModal');
             modal.classList.remove('hidden');
@@ -2526,7 +2956,6 @@
             });
         };
 
-        // Stock In / Out Modal Handlers
         window.openStockMoveModal = function(prodId, type) {
             const p = inventoryProducts.find(x => x.id === prodId);
             if (!p) return;
@@ -2541,7 +2970,7 @@
             document.getElementById('moveQtyInput').value = 1;
             document.getElementById('moveUnitPriceInput').value = isIn ? p.buyPrice : p.sellPrice;
             document.getElementById('moveNoteInput').value = '';
-            document.getElementById('moveSyncMoneyCheckbox').checked = !isIn; // Default checked for Sales (Income), optional for Stock In
+            document.getElementById('moveSyncMoneyCheckbox').checked = !isIn;
             document.getElementById('moveSyncMoneyText').textContent = isIn
                 ? (currentLang === 'my' ? 'ထွက်ငွေစာရင်းထဲ အလိုအလျောက်ထည့်မည် (Expense)' : 'Auto-record as Expense in Money Tracker')
                 : (currentLang === 'my' ? 'ဝင်ငွေစာရင်းထဲ အလိုအလျောက်ထည့်မည် (Income)' : 'Auto-record as Income in Money Tracker');
@@ -2578,7 +3007,6 @@
                 return;
             }
 
-            // Update stock quantity
             if (activeStockMove.type === 'in') p.stock += qty;
             else p.stock -= qty;
 
@@ -2603,7 +3031,6 @@
             stockLogs.unshift(logEntry);
             saveInventoryData();
 
-            // Optionally record into main Money Tracker
             if (syncMoney && totalAmount > 0) {
                 const isStockIn = activeStockMove.type === 'in';
                 const txNote = isStockIn
