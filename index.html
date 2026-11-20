@@ -1,0 +1,2660 @@
+<!DOCTYPE html>
+<html lang="my" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ငွေစာရင်းမှတ် App - Money Tracker & Myanmar Tools</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Padauk & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Padauk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Padauk', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal-enter {
+            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased flex justify-center min-h-screen transition-colors duration-300">
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-md bg-slate-50 dark:bg-slate-900 min-h-screen shadow-2xl relative flex flex-col overflow-x-hidden transition-colors duration-300">
+        
+        <!-- ==================== 1. LOGIN SCREEN ==================== -->
+        <div id="loginScreen" class="flex-1 flex flex-col justify-between p-6 fade-in">
+            <!-- Top Bar on Login (Language & Theme) -->
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-indigo-600 dark:text-indigo-400 shadow-xs flex items-center gap-1.5 active:scale-95 transition">
+                    <span>🌐</span>
+                    <span id="loginLangLabel">EN / မြန်မာ</span>
+                </button>
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 shadow-xs active:scale-95 transition" title="Toggle Theme">
+                    <span class="theme-icon text-base">🌙</span>
+                </button>
+            </div>
+
+            <!-- Hero Branding -->
+            <div class="text-center my-auto py-8">
+                <div class="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-indigo-600/30 mb-6 rotate-3">
+                    <span class="text-5xl -rotate-3">💰</span>
+                </div>
+                <h1 data-i18n="appTitle" class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">ငွေစာရင်းမှတ် App</h1>
+                <p data-i18n="loginSubtitle" class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
+                    သင်၏ နေ့စဉ် ဝင်ငွေ၊ ထွက်ငွေနှင့် မြန်မာပြက္ခဒိန်ကို တစ်နေရာတည်းတွင် စီမံခန့်ခွဲပါ
+                </p>
+            </div>
+
+            <!-- Auth Buttons -->
+            <div class="space-y-3 pb-6">
+                <!-- Google Sign In -->
+                <button onclick="signInWithGoogle()" id="googleLoginBtn" class="w-full py-3.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-2xl font-semibold text-sm shadow-sm flex items-center justify-center gap-3 active:scale-[0.98] transition">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
+                    </svg>
+                    <span data-i18n="googleBtn">Google အကောင့်ဖြင့် ဝင်မည်</span>
+                </button>
+
+                <!-- Guest Mode -->
+                <button onclick="continueAsGuest()" class="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold text-sm shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 active:scale-[0.98] transition">
+                    <span>👤</span>
+                    <span data-i18n="guestBtn">ဧည့်သည် (Guest) အဖြစ် ဆက်သုံးမည်</span>
+                </button>
+
+                <p data-i18n="loginNote" class="text-[11px] text-center text-slate-400 dark:text-slate-500 pt-2">
+                    Guest အဖြစ်သုံးပါက စာရင်းများကို ဤဖုန်းထဲတွင် သိမ်းဆည်းပေးပါမည်။
+                </p>
+            </div>
+        </div>
+
+        <!-- ==================== 2. MAIN APP SHELL ==================== -->
+        <div id="mainAppScreen" class="hidden flex-1 flex flex-col pb-24">
+            
+            <!-- Shared Top Utility Bar -->
+            <header class="bg-indigo-600 dark:bg-indigo-950 text-white pt-4 pb-4 px-5 shadow-sm relative z-20 transition-colors duration-300">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <div id="userAvatar" class="w-9 h-9 rounded-full bg-indigo-400/40 border border-white/30 flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden">
+                            👤
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="flex items-center gap-1.5">
+                                <h1 id="userDisplayName" class="text-sm font-bold truncate">Guest User</h1>
+                                <span id="userModeBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-white/20 font-medium shrink-0">Guest</span>
+                            </div>
+                            <p id="userEmailDisplay" class="text-[11px] text-indigo-200 truncate">Local Storage</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Toggles: Language, Theme, Settings -->
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="openCalculatorModal()" class="p-2 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl transition active:scale-95" title="Calculator">
+                            <span class="text-sm">🧮</span>
+                        </button>
+                        <button onclick="toggleLanguage()" class="px-2.5 py-1.5 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl text-xs font-bold transition active:scale-95" title="Change Language">
+                            <span id="headerLangCode">EN</span>
+                        </button>
+                        <button onclick="toggleTheme()" class="p-2 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl transition active:scale-95" title="Dark / Light Mode">
+                            <span class="theme-icon text-sm">🌙</span>
+                        </button>
+                        <button onclick="openSettingsModal()" class="p-2 bg-indigo-500/40 hover:bg-indigo-500/60 rounded-xl transition active:scale-95" title="Settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ==================== TAB 1: MONEY TRACKER VIEW ==================== -->
+            <div id="view-tracker" class="flex-1 flex flex-col fade-in">
+                <!-- Month Header Banner -->
+                <div class="bg-indigo-600 dark:bg-indigo-950 text-white pt-1 pb-20 px-5 rounded-b-[2rem] shadow-md relative z-10 transition-colors duration-300">
+                    <div class="flex items-center justify-between bg-indigo-700/60 dark:bg-indigo-900/70 px-3 py-1.5 rounded-xl border border-indigo-400/20">
+                        <button onclick="changeMonth(-1)" class="p-1 hover:bg-indigo-500/50 rounded-lg transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span id="currentMonthDisplay" class="text-sm font-semibold tracking-wide">2026 ခုနှစ်၊ နိုဝင်ဘာလ</span>
+                        <button onclick="changeMonth(1)" class="p-1 hover:bg-indigo-500/50 rounded-lg transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Balance Summary Card -->
+                <div class="px-5 -mt-14 relative z-20">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-lg border border-slate-100 dark:border-slate-700/80 transition-colors duration-300">
+                        <div class="text-center pb-4 border-b border-slate-100 dark:border-slate-700">
+                            <p data-i18n="totalBalance" class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">စုစုပေါင်း လက်ကျန်ငွေ</p>
+                            <h2 id="totalBalance" class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">0 MMK</h2>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-4">
+                            <!-- Income -->
+                            <div class="flex items-center gap-2.5 bg-emerald-50/80 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-100/50 dark:border-emerald-800/30">
+                                <div class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                    </svg>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p data-i18n="incomeLabel" class="text-xs text-slate-500 dark:text-slate-400 font-medium">ဝင်ငွေ</p>
+                                    <p id="totalIncome" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 truncate">0 MMK</p>
+                                </div>
+                            </div>
+                            <!-- Expense -->
+                            <div class="flex items-center gap-2.5 bg-rose-50/80 dark:bg-rose-950/40 p-3 rounded-xl border border-rose-100/50 dark:border-rose-800/30">
+                                <div class="w-9 h-9 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p data-i18n="expenseLabel" class="text-xs text-slate-500 dark:text-slate-400 font-medium">ထွက်ငွေ</p>
+                                    <p id="totalExpense" class="text-sm font-bold text-rose-600 dark:text-rose-400 truncate">0 MMK</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Tracker Content -->
+                <main class="px-5 mt-5 space-y-5 flex-1">
+                    <!-- Expense Breakdown Chart Card -->
+                    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 transition-colors duration-300">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 data-i18n="expenseBreakdown" class="text-sm font-bold text-slate-700 dark:text-slate-200">ထွက်ငွေ ခွဲခြမ်းစိတ်ဖြာမှု</h3>
+                            <span id="chartMonthLabel" class="text-xs text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-md">ယခုလ</span>
+                        </div>
+                        
+                        <div id="chartContainer" class="relative h-44 flex items-center justify-center">
+                            <canvas id="expenseChart"></canvas>
+                            <div id="emptyChartMessage" class="hidden text-center py-4">
+                                <p class="text-3xl mb-1.5">📊</p>
+                                <p data-i18n="emptyChart" class="text-xs text-slate-400 dark:text-slate-500">ယခုလအတွက် ထွက်ငွေစာရင်း မရှိသေးပါ</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Transactions History Section -->
+                    <section>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 data-i18n="historyTitle" class="text-base font-bold text-slate-800 dark:text-slate-100">ငွေစာရင်း မှတ်တမ်းများ</h3>
+                            <span id="transactionCount" class="text-xs text-slate-500 dark:text-slate-400 font-medium">0 ခု</span>
+                        </div>
+
+                        <!-- Search & Filter Controls -->
+                        <div class="space-y-3 mb-4">
+                            <div class="relative">
+                                <input type="text" id="searchInput" oninput="renderApp()" placeholder="မှတ်ချက် (သို့) အမျိုးအစား ရှာရန်..." 
+                                    class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+
+                            <!-- Filter Tabs -->
+                            <div class="grid grid-cols-3 gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl">
+                                <button onclick="setFilter('all')" id="tab-all" data-i18n="filterAll" class="py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">အားလုံး</button>
+                                <button onclick="setFilter('income')" id="tab-income" data-i18n="filterIncome" class="py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 transition">ဝင်ငွေ</button>
+                                <button onclick="setFilter('expense')" id="tab-expense" data-i18n="filterExpense" class="py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 transition">ထွက်ငွေ</button>
+                            </div>
+                        </div>
+
+                        <!-- Transaction List -->
+                        <div id="transactionList" class="space-y-2.5 pb-6"></div>
+                    </section>
+                </main>
+
+                <!-- Floating Action Button (FAB) positioned above Bottom Nav -->
+                <div id="fabContainer" class="fixed bottom-20 left-0 right-0 flex justify-center pointer-events-none z-30">
+                    <div class="w-full max-w-md px-5 flex justify-end">
+                        <button onclick="openAddModal()" class="pointer-events-auto bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-4 py-3 rounded-full shadow-xl shadow-indigo-600/35 flex items-center gap-2 font-semibold text-sm transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span data-i18n="addBtn">စာရင်းသစ်ထည့်ရန်</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB: SHOP INVENTORY & STOCK IN/OUT VIEW ==================== -->
+            <div id="view-inventory" class="hidden flex-1 flex flex-col px-5 pt-5 pb-6 space-y-4 fade-in">
+                <!-- Inventory Header -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 data-i18n="invHeaderTitle" class="text-lg font-bold text-slate-800 dark:text-white">ကုန်ပစ္စည်းနှင့် စတော့စာရင်း</h2>
+                        <p data-i18n="invHeaderSub" class="text-xs text-slate-500 dark:text-slate-400">လက်ကျန်ပစ္စည်းနှင့် အဝင်/အထွက် မှတ်တမ်း</p>
+                    </div>
+                    <button onclick="openProductModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 flex items-center gap-1.5 active:scale-95 transition">
+                        <span>+</span>
+                        <span data-i18n="addProductBtn">ပစ္စည်းသစ်</span>
+                    </button>
+                </div>
+
+                <!-- Inventory KPI Summary Cards -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs">
+                        <p data-i18n="invTotalItems" class="text-[10px] font-semibold text-slate-400">ပစ္စည်းအမျိုးအစား</p>
+                        <p id="invProductTypesCount" class="text-base font-bold text-slate-800 dark:text-white mt-0.5">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs">
+                        <p data-i18n="invTotalStock" class="text-[10px] font-semibold text-slate-400">လက်ကျန်စုစုပေါင်း</p>
+                        <p id="invTotalStockCount" class="text-base font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs">
+                        <p data-i18n="invLowStock" class="text-[10px] font-semibold text-slate-400">လက်ကျန်နည်း</p>
+                        <p id="invLowStockCount" class="text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5">0</p>
+                    </div>
+                </div>
+
+                <!-- Inventory Total Value Banner -->
+                <div class="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-900 dark:to-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex justify-between items-center">
+                    <div>
+                        <p data-i18n="invTotalValueLabel" class="text-[11px] text-indigo-100">လက်ကျန်ပစ္စည်း စုစုပေါင်းတန်ဖိုး (ရောင်းဈေး)</p>
+                        <p id="invTotalValueAmount" class="text-lg font-bold tracking-tight">0 MMK</p>
+                    </div>
+                    <button onclick="exportInventoryCSV()" class="px-2.5 py-1.5 bg-white/15 hover:bg-white/25 rounded-xl text-[11px] font-bold transition active:scale-95">
+                        📥 CSV
+                    </button>
+                </div>
+
+                <!-- Sub-Tabs: Product List vs Stock In/Out History -->
+                <div class="grid grid-cols-2 gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl">
+                    <button onclick="setInvSubTab('products')" id="inv-subtab-products" data-i18n="invSubProducts" class="py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition">ပစ္စည်းစာရင်း (Stock)</button>
+                    <button onclick="setInvSubTab('logs')" id="inv-subtab-logs" data-i18n="invSubLogs" class="py-1.5 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 transition">အဝင်/အထွက် မှတ်တမ်း</button>
+                </div>
+
+                <!-- Sub-View A: Product List -->
+                <div id="invProductsSection" class="space-y-3">
+                    <div class="relative">
+                        <input type="text" id="invSearchInput" oninput="renderInventory()" placeholder="ပစ္စည်းအမည် ရှာရန်..." 
+                            class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div id="invProductList" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Sub-View B: Stock In/Out Movement History -->
+                <div id="invLogsSection" class="hidden space-y-2.5">
+                    <div class="flex gap-1.5">
+                        <button onclick="setStockLogFilter('all')" id="log-filter-all" data-i18n="filterAll" class="px-3 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white">အားလုံး</button>
+                        <button onclick="setStockLogFilter('in')" id="log-filter-in" data-i18n="stockInBadge" class="px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">+ အဝင်</button>
+                        <button onclick="setStockLogFilter('out')" id="log-filter-out" data-i18n="stockOutBadge" class="px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">- အထွက်</button>
+                    </div>
+                    <div id="invStockLogList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB 2: BURMESE & ENGLISH CALENDAR VIEW ==================== -->
+            <div id="view-calendar" class="hidden flex-1 flex flex-col px-5 pt-5 pb-6 space-y-4 fade-in">
+                <!-- Calendar Header Card -->
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-700 dark:from-indigo-900 dark:to-slate-800 text-white rounded-2xl p-4 shadow-md">
+                    <div class="flex justify-between items-center mb-3">
+                        <button onclick="changeCalMonth(-1)" class="p-2 bg-white/15 hover:bg-white/25 rounded-xl transition active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <div class="text-center">
+                            <h2 id="calEngMonthYear" class="text-base font-bold tracking-wide">November 2026</h2>
+                            <p id="calMmMonthYear" class="text-xs text-indigo-100 mt-0.5 font-medium">မြန်မာသက္ကရာဇ် ၁၃၈၈ ခုနှစ်၊ တန်ဆောင်မုန်းလ</p>
+                        </div>
+                        <button onclick="changeCalMonth(1)" class="p-2 bg-white/15 hover:bg-white/25 rounded-xl transition active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-white/15 text-xs">
+                        <span id="calTodayBadge" class="text-indigo-100">ယနေ့: ၁၃၈၈ တန်ဆောင်မုန်းလဆန်း ၇ ရက်</span>
+                        <button onclick="goToCalToday()" data-i18n="todayBtn" class="px-2.5 py-1 bg-white text-indigo-700 font-bold rounded-lg shadow-xs active:scale-95 transition">ယနေ့</button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid Box -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-sm border border-slate-100 dark:border-slate-700/80">
+                    <!-- Weekday Headers -->
+                    <div id="calWeekdays" class="grid grid-cols-7 text-center text-[11px] font-bold text-slate-400 dark:text-slate-400 pb-2 border-b border-slate-100 dark:border-slate-700">
+                        <span class="text-rose-500">တနင်္ဂနွေ</span>
+                        <span>တနင်္လာ</span>
+                        <span>အင်္ဂါ</span>
+                        <span>ဗုဒ္ဓဟူး</span>
+                        <span>ကြာသပတေး</span>
+                        <span>သောကြာ</span>
+                        <span class="text-rose-500">စနေ</span>
+                    </div>
+
+                    <!-- Days Matrix -->
+                    <div id="calDaysGrid" class="grid grid-cols-7 gap-1 pt-2"></div>
+
+                    <!-- Legend -->
+                    <div class="flex flex-wrap items-center justify-center gap-3 pt-3 mt-3 border-t border-slate-100 dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> <span data-i18n="fullMoonLegend">လပြည့်</span></span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-700 dark:bg-slate-300 inline-block"></span> <span data-i18n="newMoonLegend">လကွယ်</span></span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> <span data-i18n="sabbathLegend">ဥပုသ်နေ့</span></span>
+                        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500 inline-block"></span> <span data-i18n="hasTxLegend">စာရင်းရှိ</span></span>
+                    </div>
+                </div>
+
+                <!-- Selected Day Detail Card -->
+                <div id="selectedDateDetailCard" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p id="detailEngDate" class="text-sm font-bold text-slate-800 dark:text-white">Monday, November 16, 2026</p>
+                            <p id="detailMmDate" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">၁၃၈၈ ခုနှစ်၊ တန်ဆောင်မုန်းလဆန်း ၇ ရက်</p>
+                        </div>
+                        <span id="detailAstroBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold hidden">ဥပုသ်နေ့</span>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <span data-i18n="dayTxTitle" class="text-xs font-bold text-slate-500 dark:text-slate-400">ယင်းနေ့ရှိ ငွေစာရင်းများ</span>
+                            <button onclick="openAddModalForSelectedDate()" data-i18n="addOnDateBtn" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">+ စာရင်းထည့်မည်</button>
+                        </div>
+                        <div id="selectedDateTxList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TAB 3: TOOLS & UTILITIES MENU VIEW ==================== -->
+            <div id="view-tools" class="hidden flex-1 flex flex-col px-5 pt-5 pb-6 space-y-4 fade-in">
+                
+                <!-- Tools Hub Header -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 data-i18n="toolsHubTitle" class="text-lg font-bold text-slate-800 dark:text-white">မီနူးနှင့် အသုံးဝင်ကိရိယာများ</h2>
+                        <p data-i18n="toolsHubSub" class="text-xs text-slate-500 dark:text-slate-400">နေ့စဉ်သုံး တွက်ချက်မှုနှင့် မှတ်စုများ</p>
+                    </div>
+                </div>
+
+                <!-- Quick Menu Grid Cards -->
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="openCalculatorModal()" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg mb-2">🧮</div>
+                        <p data-i18n="toolCalcName" class="text-xs font-bold text-slate-800 dark:text-white">ဂဏန်းတွက်စက်</p>
+                        <p data-i18n="toolCalcDesc" class="text-[10px] text-slate-400 mt-0.5">Calculator & Quick Fill</p>
+                    </button>
+
+                    <button onclick="switchMainTab('inventory')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center text-lg mb-2">📦</div>
+                        <p data-i18n="toolInvName" class="text-xs font-bold text-slate-800 dark:text-white">ကုန်ပစ္စည်းစာရင်း</p>
+                        <p data-i18n="toolInvDesc" class="text-[10px] text-slate-400 mt-0.5">Stock In/Out & Sales</p>
+                    </button>
+
+                    <button onclick="scrollToTool('tool-savings')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg mb-2">🎯</div>
+                        <p data-i18n="toolSavingsName" class="text-xs font-bold text-slate-800 dark:text-white">စုငွေပန်းတိုင်</p>
+                        <p data-i18n="toolSavingsDesc" class="text-[10px] text-slate-400 mt-0.5">Savings Goal</p>
+                    </button>
+
+                    <button onclick="scrollToTool('tool-currency')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg mb-2">💱</div>
+                        <p data-i18n="toolCurrencyName" class="text-xs font-bold text-slate-800 dark:text-white">ငွေလဲနှုန်းတွက်စက်</p>
+                        <p data-i18n="toolCurrencyDesc" class="text-[10px] text-slate-400 mt-0.5">MMK / USD / THB / SGD</p>
+                    </button>
+
+                    <button onclick="scrollToTool('tool-notes')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg mb-2">🛒</div>
+                        <p data-i18n="toolNotesName" class="text-xs font-bold text-slate-800 dark:text-white">ဈေးဝယ်မှတ်စု</p>
+                        <p data-i18n="toolNotesDesc" class="text-[10px] text-slate-400 mt-0.5">Shopping & Todo List</p>
+                    </button>
+
+                    <button onclick="scrollToTool('tool-backup')" class="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 shadow-xs text-left hover:border-indigo-400 transition active:scale-[0.98]">
+                        <div class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg mb-2">📥</div>
+                        <p data-i18n="toolBackupName" class="text-xs font-bold text-slate-800 dark:text-white">စာရင်းထုတ်ယူရန်</p>
+                        <p data-i18n="toolBackupDesc" class="text-[10px] text-slate-400 mt-0.5">Export CSV / Backup</p>
+                    </button>
+                </div>
+
+                <!-- 1. SAVINGS GOAL TRACKER -->
+                <section id="tool-savings" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🎯</span>
+                            <h3 data-i18n="toolSavingsName" class="text-sm font-bold text-slate-800 dark:text-white">စုငွေပန်းတိုင်</h3>
+                        </div>
+                        <button onclick="openSavingsModal()" data-i18n="editGoalBtn" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2.5 py-1 rounded-lg">ပန်းတိုင်ပြင်မည်</button>
+                    </div>
+
+                    <div class="p-3.5 bg-slate-50 dark:bg-slate-900/70 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <div class="flex justify-between items-baseline mb-1.5">
+                            <span id="goalTitleDisplay" class="text-xs font-bold text-slate-700 dark:text-slate-200">အရေးပေါ်စုငွေ (Emergency Fund)</span>
+                            <span id="goalPercentDisplay" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">0%</span>
+                        </div>
+                        <!-- Progress Bar -->
+                        <div class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                            <div id="goalProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                            <span><span data-i18n="savedLabel">စုပြီးငွေ:</span> <strong id="goalSavedDisplay" class="text-slate-700 dark:text-slate-200">0 MMK</strong></span>
+                            <span><span data-i18n="targetLabel">ပန်းတိုင်:</span> <strong id="goalTargetDisplay" class="text-slate-700 dark:text-slate-200">500,000 MMK</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Add Savings Form -->
+                    <div class="flex gap-2">
+                        <input type="number" id="addSavingsInput" placeholder="10000" min="1" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <button onclick="addSavingsAmount()" data-i18n="addSaveBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 transition">+ စုမည်</button>
+                    </div>
+                </section>
+
+                <!-- 2. CURRENCY EXCHANGE CONVERTER -->
+                <section id="tool-currency" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">💱</span>
+                            <h3 data-i18n="toolCurrencyName" class="text-sm font-bold text-slate-800 dark:text-white">ငွေလဲနှုန်းတွက်စက်</h3>
+                        </div>
+                        <span class="text-[10px] text-slate-400" data-i18n="editableRateHint">နှုန်းထားပြင်နိုင်သည်</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label data-i18n="foreignCurrencyLabel" class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">နိုင်ငံခြားငွေ</label>
+                            <select id="currencySelect" onchange="onCurrencySelectChange()" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none">
+                                <option value="USD">🇺🇸 USD (ဒေါ်လာ)</option>
+                                <option value="THB">🇹🇭 THB (ထိုင်းဘတ်)</option>
+                                <option value="SGD">🇸🇬 SGD (စင်ကာပူ)</option>
+                                <option value="JPY">🇯🇵 JPY (ဂျပန်ယန်း)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label data-i18n="exchangeRateLabel" class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">1 ယူနစ် = MMK</label>
+                            <input type="number" id="exchangeRateInput" oninput="convertFromForeign()" value="4500" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-indigo-600 dark:text-indigo-400 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <div>
+                            <label id="foreignAmountLabel" class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">USD ပမာဏ</label>
+                            <input type="number" id="foreignAmountInput" oninput="convertFromForeign()" value="100" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">MMK ကျပ်ငွေ</label>
+                            <input type="number" id="mmkAmountInput" oninput="convertFromMMK()" value="450000" class="w-full px-3 py-2.5 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl text-sm font-bold text-indigo-700 dark:text-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. QUICK SHOPPING LIST / MEMO -->
+                <section id="tool-notes" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🛒</span>
+                            <h3 data-i18n="toolNotesName" class="text-sm font-bold text-slate-800 dark:text-white">ဈေးဝယ်မှတ်စုနှင့် လုပ်ငန်းစဉ်</h3>
+                        </div>
+                        <span id="notesCountBadge" class="text-[11px] text-slate-400">0</span>
+                    </div>
+
+                    <form onsubmit="addQuickNote(event)" class="flex gap-2">
+                        <input type="text" id="quickNoteInput" placeholder="ဝယ်ရန်ပစ္စည်း (သို့) မှတ်စုရေးပါ..." class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl active:scale-95 transition">+</button>
+                    </form>
+
+                    <div id="quickNotesList" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+                </section>
+
+                <!-- 4. EXPORT & DATA BACKUP -->
+                <section id="tool-backup" class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/80 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📥</span>
+                        <h3 data-i18n="toolBackupName" class="text-sm font-bold text-slate-800 dark:text-white">စာရင်းထုတ်ယူရန် (Export Data)</h3>
+                    </div>
+                    <p data-i18n="exportDesc" class="text-xs text-slate-500 dark:text-slate-400">သင်၏ ငွေစာရင်းမှတ်တမ်းများကို Excel (CSV) ဖိုင်အဖြစ် သိမ်းဆည်းနိုင်ပါသည်။</p>
+                    <button onclick="exportTransactionsCSV()" class="w-full py-2.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition">
+                        <span>📄</span>
+                        <span data-i18n="downloadCsvBtn">CSV ဖိုင်အဖြစ် ဒေါင်းလုဒ်ဆွဲမည်</span>
+                    </button>
+                </section>
+            </div>
+
+            <!-- ==================== BOTTOM MENU NAVIGATION BAR ==================== -->
+            <nav class="fixed bottom-0 left-0 right-0 flex justify-center z-40 pointer-events-none">
+                <div class="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 grid grid-cols-4 gap-1 pointer-events-auto shadow-lg">
+                    <!-- Menu 1: Money Tracker -->
+                    <button onclick="switchMainTab('tracker')" id="nav-tracker" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 transition">
+                        <span class="text-lg leading-none mb-1">💰</span>
+                        <span data-i18n="navTracker" class="text-[10px] font-bold">ငွေစာရင်း</span>
+                    </button>
+
+                    <!-- Menu 2: Shop Inventory / Stock -->
+                    <button onclick="switchMainTab('inventory')" id="nav-inventory" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <span class="text-lg leading-none mb-1">📦</span>
+                        <span data-i18n="navInventory" class="text-[10px] font-bold">ကုန်ပစ္စည်း</span>
+                    </button>
+
+                    <!-- Menu 3: Burmese & English Calendar -->
+                    <button onclick="switchMainTab('calendar')" id="nav-calendar" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <span class="text-lg leading-none mb-1">📅</span>
+                        <span data-i18n="navCalendar" class="text-[10px] font-bold">ပြက္ခဒိန်</span>
+                    </button>
+
+                    <!-- Menu 4: Menu / Tools -->
+                    <button onclick="switchMainTab('tools')" id="nav-tools" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <span class="text-lg leading-none mb-1">🧰</span>
+                        <span data-i18n="navMenu" class="text-[10px] font-bold">မီနူး</span>
+                    </button>
+                </div>
+            </nav>
+
+        </div>
+
+        <!-- ==================== 7. CALCULATOR MODAL ==================== -->
+        <div id="calculatorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl modal-enter border-t dark:border-slate-700">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🧮</span>
+                        <h3 data-i18n="calcTitle" class="text-base font-bold text-slate-800 dark:text-white">ဂဏန်းတွက်စက် (Calculator)</h3>
+                    </div>
+                    <button onclick="closeCalculatorModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-full text-slate-500 dark:text-slate-300">✕</button>
+                </div>
+
+                <!-- Display Screen -->
+                <div class="bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl mb-3 text-right border border-slate-200/70 dark:border-slate-700">
+                    <div id="calcExpression" class="text-xs text-slate-400 h-4 truncate font-mono"></div>
+                    <div id="calcDisplay" class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight truncate mt-1 font-mono">0</div>
+                </div>
+
+                <!-- Use Amount Action Button -->
+                <button onclick="useCalculatorResult()" class="w-full py-2.5 mb-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+                    <span>➕</span>
+                    <span data-i18n="calcUseBtn">ရလဒ်ကို ငွေစာရင်းထဲ ထည့်သုံးမည်</span>
+                </button>
+
+                <!-- Keypad Grid -->
+                <div class="grid grid-cols-4 gap-2 text-base font-bold">
+                    <button onclick="calcClear()" class="py-3 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 active:scale-95 transition">AC</button>
+                    <button onclick="calcBackspace()" class="py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 active:scale-95 transition">⌫</button>
+                    <button onclick="calcPercent()" class="py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 active:scale-95 transition">%</button>
+                    <button onclick="calcAppendOp('/')" class="py-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 active:scale-95 transition">÷</button>
+
+                    <button onclick="calcAppendNum('7')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">7</button>
+                    <button onclick="calcAppendNum('8')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">8</button>
+                    <button onclick="calcAppendNum('9')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">9</button>
+                    <button onclick="calcAppendOp('*')" class="py-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 active:scale-95 transition">×</button>
+
+                    <button onclick="calcAppendNum('4')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">4</button>
+                    <button onclick="calcAppendNum('5')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">5</button>
+                    <button onclick="calcAppendNum('6')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">6</button>
+                    <button onclick="calcAppendOp('-')" class="py-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 active:scale-95 transition">−</button>
+
+                    <button onclick="calcAppendNum('1')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">1</button>
+                    <button onclick="calcAppendNum('2')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">2</button>
+                    <button onclick="calcAppendNum('3')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">3</button>
+                    <button onclick="calcAppendOp('+')" class="py-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 active:scale-95 transition">+</button>
+
+                    <button onclick="calcAppendNum('00')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">00</button>
+                    <button onclick="calcAppendNum('0')" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">0</button>
+                    <button onclick="calcAppendDot()" class="py-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200/60 dark:border-slate-700 active:scale-95 transition">.</button>
+                    <button onclick="calcEvaluate()" class="py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95 transition">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 8. ADD / EDIT PRODUCT MODAL ==================== -->
+        <div id="productModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl modal-enter max-h-[90vh] overflow-y-auto border-t dark:border-slate-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="productModalTitle" data-i18n="addProductModalTitle" class="text-base font-bold text-slate-800 dark:text-white">ကုန်ပစ္စည်းအသစ် ထည့်ရန်</h3>
+                    <button onclick="closeProductModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500">✕</button>
+                </div>
+
+                <form onsubmit="handleProductSubmit(event)" class="space-y-3.5">
+                    <input type="hidden" id="editProductId" value="">
+                    <div>
+                        <label data-i18n="prodNameLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">ပစ္စည်းအမည်</label>
+                        <input type="text" id="prodNameInput" required placeholder="ဥပမာ - ကော်ဖီမစ် (၁ထုပ်)" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label data-i18n="prodBuyPriceLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">ဝယ်ဈေး (MMK)</label>
+                            <input type="number" id="prodBuyPriceInput" required min="0" step="any" placeholder="1500" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                        </div>
+                        <div>
+                            <label data-i18n="prodSellPriceLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">ရောင်းဈေး (MMK)</label>
+                            <input type="number" id="prodSellPriceInput" required min="0" step="any" placeholder="2000" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label data-i18n="prodStockLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">လက်ကျန်</label>
+                            <input type="number" id="prodStockInput" required min="0" value="0" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                        </div>
+                        <div>
+                            <label data-i18n="prodUnitLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">ယူနစ်</label>
+                            <input type="text" id="prodUnitInput" value="ခု" placeholder="ခု/ထုပ်/ဗူး" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label data-i18n="prodLowAlertLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">သတိပေး</label>
+                            <input type="number" id="prodLowAlertInput" min="0" value="5" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+
+                    <button type="submit" data-i18n="saveBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg mt-2">သိမ်းဆည်းမည်</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== 9. STOCK IN / OUT MODAL ==================== -->
+        <div id="stockMoveModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl modal-enter border-t dark:border-slate-700">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 id="stockMoveTitle" class="text-base font-bold text-slate-800 dark:text-white">ပစ္စည်းအဝင် (+ Stock In)</h3>
+                        <p id="stockMoveProductInfo" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Product Name</p>
+                    </div>
+                    <button onclick="closeStockMoveModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500">✕</button>
+                </div>
+
+                <form onsubmit="handleStockMoveSubmit(event)" class="space-y-3.5">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label data-i18n="moveQtyLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">အရေအတွက်</label>
+                            <input type="number" id="moveQtyInput" required min="1" value="1" oninput="updateStockMoveTotal()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base font-bold">
+                        </div>
+                        <div>
+                            <label id="moveUnitPriceLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">တစ်ခုဈေးနှုန်း (MMK)</label>
+                            <input type="number" id="moveUnitPriceInput" required min="0" step="any" oninput="updateStockMoveTotal()" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base font-bold">
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200/70 dark:border-slate-700 flex justify-between items-center">
+                        <span data-i18n="moveTotalAmountLabel" class="text-xs font-semibold text-slate-500">စုစုပေါင်းသင့်ငွေ</span>
+                        <span id="moveTotalPreview" class="text-base font-bold text-indigo-600 dark:text-indigo-400">0 MMK</span>
+                    </div>
+
+                    <div>
+                        <label data-i18n="noteLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">မှတ်ချက်</label>
+                        <input type="text" id="moveNoteInput" placeholder="..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
+                    </div>
+
+                    <!-- Auto-sync with Money Tracker Checkbox -->
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800/40 cursor-pointer">
+                        <input type="checkbox" id="moveSyncMoneyCheckbox" checked class="w-4 h-4 accent-indigo-600 rounded">
+                        <span id="moveSyncMoneyText" class="text-xs font-semibold text-indigo-800 dark:text-indigo-200">ငွေစာရင်းထဲသို့ အလိုအလျောက် ထည့်သွင်းမည်</span>
+                    </label>
+
+                    <button type="submit" id="stockMoveSubmitBtn" class="w-full py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg">အတည်ပြုမည်</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== 3. ADD TRANSACTION MODAL ==================== -->
+        <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl modal-enter max-h-[90vh] overflow-y-auto border-t dark:border-slate-700">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 data-i18n="modalAddTitle" class="text-lg font-bold text-slate-800 dark:text-white">စာရင်းအသစ် ထည့်သွင်းရန်</h3>
+                    <button onclick="closeAddModal()" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full text-slate-500 dark:text-slate-300 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <!-- Type Toggle -->
+                    <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl">
+                        <button type="button" id="typeExpenseBtn" onclick="setTransactionType('expense')" data-i18n="typeExpense" class="py-2.5 text-sm font-bold rounded-lg bg-rose-500 text-white shadow-sm transition">
+                            ထွက်ငွေ (Expense)
+                        </button>
+                        <button type="button" id="typeIncomeBtn" onclick="setTransactionType('income')" data-i18n="typeIncome" class="py-2.5 text-sm font-bold rounded-lg text-slate-600 dark:text-slate-400 transition">
+                            ဝင်ငွေ (Income)
+                        </button>
+                    </div>
+
+                    <!-- Amount Input -->
+                    <div>
+                        <label data-i18n="amountLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ငွေပမာဏ (MMK)</label>
+                        <div class="relative">
+                            <input type="number" id="amountInput" required min="1" step="any" placeholder="5000" 
+                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-lg font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <span class="absolute right-4 top-3.5 text-sm font-bold text-slate-400">MMK</span>
+                        </div>
+                    </div>
+
+                    <!-- Category Selection -->
+                    <div>
+                        <label data-i18n="categoryLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">အမျိုးအစား ရွေးချယ်ပါ</label>
+                        <div id="categoryGrid" class="grid grid-cols-3 gap-2"></div>
+                    </div>
+
+                    <!-- Note / Description -->
+                    <div>
+                        <label data-i18n="noteLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">မှတ်ချက် (အကြောင်းအရာ)</label>
+                        <input type="text" id="noteInput" placeholder="..." 
+                            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+
+                    <!-- Date Picker -->
+                    <div>
+                        <label data-i18n="dateLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ရက်စွဲ</label>
+                        <input type="date" id="dateInput" required 
+                            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" data-i18n="saveBtn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition mt-2">
+                        သိမ်းဆည်းမည်
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== 4. EDIT SAVINGS GOAL MODAL ==================== -->
+        <div id="savingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-5">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl modal-enter border dark:border-slate-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 data-i18n="editGoalModalTitle" class="text-base font-bold text-slate-800 dark:text-white">စုငွေပန်းတိုင် သတ်မှတ်ရန်</h3>
+                    <button onclick="closeSavingsModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500">✕</button>
+                </div>
+                <form onsubmit="saveGoalSettings(event)" class="space-y-3">
+                    <div>
+                        <label data-i18n="goalNameLabel" class="block text-xs font-semibold text-slate-500 mb-1">ပန်းတိုင်အမည်</label>
+                        <input type="text" id="goalTitleInput" required class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label data-i18n="goalTargetInputLabel" class="block text-xs font-semibold text-slate-500 mb-1">ရည်မှန်းငွေပမာဏ (MMK)</label>
+                        <input type="number" id="goalTargetInput" required min="1" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                    </div>
+                    <div>
+                        <label data-i18n="goalCurrentInputLabel" class="block text-xs font-semibold text-slate-500 mb-1">လက်ရှိစုပြီးငွေ (MMK)</label>
+                        <input type="number" id="goalSavedInput" required min="0" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold">
+                    </div>
+                    <button type="submit" data-i18n="saveBtn" class="w-full py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-md mt-2">သိမ်းဆည်းမည်</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== 5. SETTINGS & PROFILE MODAL ==================== -->
+        <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-5">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl modal-enter border dark:border-slate-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 data-i18n="settingsTitle" class="text-lg font-bold text-slate-800 dark:text-white">ဆက်တင်နှင့် အကောင့်</h3>
+                    <button onclick="closeSettingsModal()" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-full text-slate-500 dark:text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Account Info Box -->
+                <div class="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-200/70 dark:border-slate-700 mb-4 flex items-center justify-between">
+                    <div class="overflow-hidden">
+                        <p id="settingsUserName" class="text-sm font-bold text-slate-800 dark:text-white truncate">Guest User</p>
+                        <p id="settingsUserSub" class="text-xs text-slate-500 dark:text-slate-400 truncate">Local Mode</p>
+                    </div>
+                    <span id="settingsSyncStatus" class="text-[11px] px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold shrink-0">Local</span>
+                </div>
+
+                <!-- Theme & Language Quick Row -->
+                <div class="grid grid-cols-2 gap-2.5 mb-4">
+                    <button onclick="toggleTheme()" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
+                        <span class="theme-icon">🌙</span>
+                        <span id="settingsThemeText">Dark Mode</span>
+                    </button>
+                    <button onclick="toggleLanguage()" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
+                        <span>🌐</span>
+                        <span id="settingsLangText">English</span>
+                    </button>
+                </div>
+
+                <!-- Data & Auth Actions -->
+                <div class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+                    <button onclick="clearAllData()" class="w-full py-2.5 px-4 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition">
+                        <span>🗑️</span>
+                        <span data-i18n="clearAllBtn">စာရင်းအားလုံး ဖျက်ပစ်မည် (0 MMK ပြန်ထားမည်)</span>
+                    </button>
+                    <button onclick="handleLogout()" class="w-full py-3 px-4 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition mt-2">
+                        <span>🚪</span>
+                        <span data-i18n="logoutBtn">အကောင့်မှ ထွက်မည် (Logout)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 6. CUSTOM CONFIRMATION MODAL ==================== -->
+        <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-5">
+            <div class="bg-white dark:bg-slate-800 w-full max-w-xs rounded-2xl p-5 shadow-2xl text-center border dark:border-slate-700">
+                <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-3 text-xl">⚠️</div>
+                <h4 id="confirmTitle" class="text-base font-bold text-slate-800 dark:text-white mb-1">သေချာပါသလား?</h4>
+                <p id="confirmMessage" class="text-xs text-slate-500 dark:text-slate-400 mb-5">ဤလုပ်ဆောင်ချက်ကို ပြန်ပြင်၍ မရပါ။</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="closeConfirmModal()" data-i18n="cancelBtn" class="py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition">မလုပ်တော့ပါ</button>
+                    <button id="confirmActionBtn" data-i18n="confirmBtn" class="py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl transition">သေချာပါသည်</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 whitespace-nowrap">
+            Saved
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK (Module) + App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE SETUP ---
+        let app = null, auth = null, db = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'money-tracker-mmk-v3';
+        let unsubscribeSnapshot = null;
+
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+            }
+        } catch (err) {
+            console.warn("Firebase config unavailable, running in local mode.");
+        }
+
+        // --- TRANSLATIONS (MYANMAR & ENGLISH) ---
+        const TRANSLATIONS = {
+            my: {
+                appTitle: "ငွေစာရင်းမှတ် App",
+                loginSubtitle: "သင်၏ နေ့စဉ် ဝင်ငွေ၊ ထွက်ငွေနှင့် မြန်မာပြက္ခဒိန်ကို တစ်နေရာတည်းတွင် စီမံခန့်ခွဲပါ",
+                googleBtn: "Google အကောင့်ဖြင့် ဝင်မည်",
+                guestBtn: "ဧည့်သည် (Guest) အဖြစ် ဆက်သုံးမည်",
+                loginNote: "Guest အဖြစ်သုံးပါက စာရင်းများကို ဤဖုန်းထဲတွင် သိမ်းဆည်းပေးပါမည်။",
+                navTracker: "ငွေစာရင်း",
+                navInventory: "ကုန်ပစ္စည်း",
+                navCalendar: "ပြက္ခဒိန်",
+                navMenu: "မီနူး",
+                calcTitle: "ဂဏန်းတွက်စက် (Calculator)",
+                calcUseBtn: "ရလဒ်ကို ငွေစာရင်းထဲ ထည့်သုံးမည်",
+                toolCalcName: "ဂဏန်းတွက်စက်",
+                toolCalcDesc: "Calculator & Quick Fill",
+                toolInvName: "ကုန်ပစ္စည်းစာရင်း",
+                toolInvDesc: "Stock In/Out & Sales",
+                invHeaderTitle: "ကုန်ပစ္စည်းနှင့် စတော့စာရင်း",
+                invHeaderSub: "လက်ကျန်ပစ္စည်းနှင့် အဝင်/အထွက် မှတ်တမ်း",
+                addProductBtn: "ပစ္စည်းသစ်",
+                invTotalItems: "ပစ္စည်းအမျိုးအစား",
+                invTotalStock: "လက်ကျန်စုစုပေါင်း",
+                invLowStock: "လက်ကျန်နည်း",
+                invTotalValueLabel: "လက်ကျန်ပစ္စည်း စုစုပေါင်းတန်ဖိုး (ရောင်းဈေး)",
+                invSubProducts: "ပစ္စည်းစာရင်း (Stock)",
+                invSubLogs: "အဝင်/အထွက် မှတ်တမ်း",
+                stockInBadge: "+ အဝင်",
+                stockOutBadge: "- အထွက်",
+                addProductModalTitle: "ကုန်ပစ္စည်းအသစ် ထည့်ရန်",
+                editProductModalTitle: "ကုန်ပစ္စည်း ပြင်ဆင်ရန်",
+                prodNameLabel: "ပစ္စည်းအမည်",
+                prodBuyPriceLabel: "ဝယ်ဈေး (MMK)",
+                prodSellPriceLabel: "ရောင်းဈေး (MMK)",
+                prodStockLabel: "လက်ကျန်",
+                prodUnitLabel: "ယူနစ်",
+                prodLowAlertLabel: "သတိပေး",
+                moveQtyLabel: "အရေအတွက်",
+                moveTotalAmountLabel: "စုစုပေါင်းသင့်ငွေ",
+                totalBalance: "စုစုပေါင်း လက်ကျန်ငွေ",
+                incomeLabel: "ဝင်ငွေ",
+                expenseLabel: "ထွက်ငွေ",
+                expenseBreakdown: "ထွက်ငွေ ခွဲခြမ်းစိတ်ဖြာမှု",
+                emptyChart: "ယခုလအတွက် ထွက်ငွေစာရင်း မရှိသေးပါ",
+                historyTitle: "ငွေစာရင်း မှတ်တမ်းများ",
+                searchPlaceholder: "မှတ်ချက် (သို့) အမျိုးအစား ရှာရန်...",
+                filterAll: "အားလုံး",
+                filterIncome: "ဝင်ငွေ",
+                filterExpense: "ထွက်ငွေ",
+                addBtn: "စာရင်းသစ်ထည့်ရန်",
+                modalAddTitle: "စာရင်းအသစ် ထည့်သွင်းရန်",
+                typeExpense: "ထွက်ငွေ (Expense)",
+                typeIncome: "ဝင်ငွေ (Income)",
+                amountLabel: "ငွေပမာဏ (MMK)",
+                categoryLabel: "အမျိုးအစား ရွေးချယ်ပါ",
+                noteLabel: "မှတ်ချက် (အကြောင်းအရာ)",
+                notePlaceholder: "ဥပမာ - မနက်စာ မုန့်ဟင်းခါး",
+                dateLabel: "ရက်စွဲ",
+                saveBtn: "သိမ်းဆည်းမည်",
+                settingsTitle: "ဆက်တင်နှင့် အကောင့်",
+                clearAllBtn: "စာရင်းအားလုံး ဖျက်ပစ်မည် (0 MMK ပြန်ထားမည်)",
+                logoutBtn: "အကောင့်မှ ထွက်မည် (Logout)",
+                cancelBtn: "မလုပ်တော့ပါ",
+                confirmBtn: "သေချာပါသည်",
+                emptyListTitle: "စာရင်းမှတ်တမ်း မရှိသေးပါ (0 MMK)",
+                emptyListSub: "အောက်ခြေရှိ \"+ စာရင်းသစ်ထည့်ရန်\" ခလုတ်ကို နှိပ်ပြီး စတင်မှတ်သားပါ",
+                itemsCount: "ခု",
+                toastSaved: "စာရင်းသစ် သိမ်းဆည်းပြီးပါပြီ ✓",
+                toastDeleted: "စာရင်းကို ဖျက်ပြီးပါပြီ",
+                toastCleared: "စာရင်းအားလုံး ဖျက်ပြီးပါပြီ",
+                confirmDelTitle: "ဤစာရင်းကို ဖျက်မည်လား?",
+                confirmDelMsg: "ဖျက်ပြီးပါက ပြန်လည်ရယူနိုင်မည် မဟုတ်ပါ။",
+                confirmClearTitle: "စာရင်းအားလုံး ဖျက်မည်လား?",
+                confirmClearMsg: "သိမ်းဆည်းထားသော စာရင်းအားလုံး ပျက်သွားပြီး 0 MMK ပြန်ဖြစ်သွားပါမည်။",
+                todayBtn: "ယနေ့",
+                fullMoonLegend: "လပြည့်",
+                newMoonLegend: "လကွယ်",
+                sabbathLegend: "ဥပုသ်နေ့",
+                hasTxLegend: "စာရင်းရှိ",
+                dayTxTitle: "ယင်းနေ့ရှိ ငွေစာရင်းများ",
+                addOnDateBtn: "+ စာရင်းထည့်မည်",
+                noDayTx: "ယင်းနေ့အတွက် ငွေစာရင်း မရှိသေးပါ",
+                toolsHubTitle: "မီနူးနှင့် အသုံးဝင်ကိရိယာများ",
+                toolsHubSub: "နေ့စဉ်သုံး တွက်ချက်မှုနှင့် မှတ်စုများ",
+                toolSavingsName: "စုငွေပန်းတိုင်",
+                toolSavingsDesc: "Savings Goal Tracker",
+                toolCurrencyName: "ငွေလဲနှုန်းတွက်စက်",
+                toolCurrencyDesc: "MMK / USD / THB / SGD",
+                toolNotesName: "ဈေးဝယ်မှတ်စု",
+                toolNotesDesc: "Shopping & Todo List",
+                toolBackupName: "စာရင်းထုတ်ယူရန်",
+                toolBackupDesc: "Export CSV / Backup",
+                editGoalBtn: "ပန်းတိုင်ပြင်မည်",
+                savedLabel: "စုပြီးငွေ:",
+                targetLabel: "ပန်းတိုင်:",
+                addSaveBtn: "+ စုမည်",
+                editGoalModalTitle: "စုငွေပန်းတိုင် သတ်မှတ်ရန်",
+                goalNameLabel: "ပန်းတိုင်အမည်",
+                goalTargetInputLabel: "ရည်မှန်းငွေပမာဏ (MMK)",
+                goalCurrentInputLabel: "လက်ရှိစုပြီးငွေ (MMK)",
+                editableRateHint: "နှုန်းထားပြင်နိုင်သည်",
+                foreignCurrencyLabel: "နိုင်ငံခြားငွေ",
+                exchangeRateLabel: "1 ယူနစ် = MMK",
+                exportDesc: "သင်၏ ငွေစာရင်းမှတ်တမ်းများကို Excel (CSV) ဖိုင်အဖြစ် သိမ်းဆည်းနိုင်ပါသည်။",
+                downloadCsvBtn: "CSV ဖိုင်အဖြစ် ဒေါင်းလုဒ်ဆွဲမည်",
+                months: ["ဇန်နဝါရီလ", "ဖေဖော်ဝါရီလ", "မတ်လ", "ဧပြီလ", "မေလ", "ဇွန်လ", "ဇူလိုင်လ", "ဩဂုတ်လ", "စက်တင်ဘာလ", "အောက်တိုဘာလ", "နိုဝင်ဘာလ", "ဒီဇင်ဘာလ"],
+                weekdaysShort: ["တနင်္ဂနွေ", "တနင်္လာ", "အင်္ဂါ", "ဗုဒ္ဓဟူး", "ကြာသပတေး", "သောကြာ", "စနေ"],
+                categories: {
+                    food: "အစားအသောက်", transport: "သွားလာရေး", shopping: "စျေးဝယ်ခြင်း",
+                    bills: "ဘေလ်နှင့်ဖုန်း", health: "ကျန်းမာရေး", other_exp: "အခြားထွက်ငွေ",
+                    salary: "လစာ", business: "လုပ်ငန်းဝင်ငွေ", gift: "မုန့်ဖိုး/လက်ဆောင်", other_inc: "အခြားဝင်ငွေ"
+                }
+            },
+            en: {
+                appTitle: "Money Tracker",
+                loginSubtitle: "Manage your daily income, expenses, and Myanmar calendar in one place",
+                googleBtn: "Sign in with Google",
+                guestBtn: "Continue as Guest",
+                loginNote: "Guest data is saved locally on this device.",
+                navTracker: "Tracker",
+                navInventory: "Inventory",
+                navCalendar: "Calendar",
+                navMenu: "Menu",
+                calcTitle: "Calculator",
+                calcUseBtn: "Use Result in Money Tracker",
+                toolCalcName: "Calculator",
+                toolCalcDesc: "Quick arithmetic & fill",
+                toolInvName: "Shop Inventory",
+                toolInvDesc: "Stock In/Out & Sales",
+                invHeaderTitle: "Shop Inventory & Stock",
+                invHeaderSub: "Track products, stock in & sales",
+                addProductBtn: "New Item",
+                invTotalItems: "Product Types",
+                invTotalStock: "Total Units",
+                invLowStock: "Low Stock",
+                invTotalValueLabel: "Total Inventory Value (Sell Price)",
+                invSubProducts: "Product List",
+                invSubLogs: "Stock In/Out Log",
+                stockInBadge: "+ Stock In",
+                stockOutBadge: "- Stock Out",
+                addProductModalTitle: "Add New Product",
+                editProductModalTitle: "Edit Product",
+                prodNameLabel: "Product Name",
+                prodBuyPriceLabel: "Buy Price (MMK)",
+                prodSellPriceLabel: "Sell Price (MMK)",
+                prodStockLabel: "Stock Qty",
+                prodUnitLabel: "Unit",
+                prodLowAlertLabel: "Low Alert",
+                moveQtyLabel: "Quantity",
+                moveTotalAmountLabel: "Total Amount",
+                totalBalance: "Total Balance",
+                incomeLabel: "Income",
+                expenseLabel: "Expense",
+                expenseBreakdown: "Expense Breakdown",
+                emptyChart: "No expenses recorded for this month",
+                historyTitle: "Transaction History",
+                searchPlaceholder: "Search notes or categories...",
+                filterAll: "All",
+                filterIncome: "Income",
+                filterExpense: "Expense",
+                addBtn: "Add Transaction",
+                modalAddTitle: "New Transaction",
+                typeExpense: "Expense",
+                typeIncome: "Income",
+                amountLabel: "Amount (MMK)",
+                categoryLabel: "Select Category",
+                noteLabel: "Note / Description",
+                notePlaceholder: "e.g., Morning Mohinga & Tea",
+                dateLabel: "Date",
+                saveBtn: "Save Transaction",
+                settingsTitle: "Settings & Account",
+                clearAllBtn: "Clear All Data (Reset to 0 MMK)",
+                logoutBtn: "Log Out / Switch Account",
+                cancelBtn: "Cancel",
+                confirmBtn: "Confirm",
+                emptyListTitle: "No transactions yet (0 MMK)",
+                emptyListSub: "Tap \"+ Add Transaction\" below to record your first entry",
+                itemsCount: "items",
+                toastSaved: "Transaction saved ✓",
+                toastDeleted: "Transaction deleted",
+                toastCleared: "All transactions cleared",
+                confirmDelTitle: "Delete this transaction?",
+                confirmDelMsg: "This action cannot be undone.",
+                confirmClearTitle: "Clear all data?",
+                confirmClearMsg: "All saved records will be deleted and balance reset to 0 MMK.",
+                todayBtn: "Today",
+                fullMoonLegend: "Full Moon",
+                newMoonLegend: "New Moon",
+                sabbathLegend: "Sabbath",
+                hasTxLegend: "Recorded",
+                dayTxTitle: "Transactions on this date",
+                addOnDateBtn: "+ Add Entry",
+                noDayTx: "No transactions recorded on this date",
+                toolsHubTitle: "Menu & Daily Tools",
+                toolsHubSub: "Practical calculators & personal checklists",
+                toolSavingsName: "Savings Goal",
+                toolSavingsDesc: "Track target savings",
+                toolCurrencyName: "Currency Converter",
+                toolCurrencyDesc: "MMK / USD / THB / SGD",
+                toolNotesName: "Shopping List",
+                toolNotesDesc: "Quick memo & checklist",
+                toolBackupName: "Export Data",
+                toolBackupDesc: "Download CSV backup",
+                editGoalBtn: "Edit Goal",
+                savedLabel: "Saved:",
+                targetLabel: "Target:",
+                addSaveBtn: "+ Add",
+                editGoalModalTitle: "Set Savings Goal",
+                goalNameLabel: "Goal Name",
+                goalTargetInputLabel: "Target Amount (MMK)",
+                goalCurrentInputLabel: "Current Saved (MMK)",
+                editableRateHint: "Editable rate",
+                foreignCurrencyLabel: "Currency",
+                exchangeRateLabel: "1 Unit = MMK",
+                exportDesc: "Download your income and expense history as an Excel-compatible CSV file.",
+                downloadCsvBtn: "Download CSV File",
+                months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                weekdaysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                categories: {
+                    food: "Food & Dining", transport: "Transport", shopping: "Shopping",
+                    bills: "Bills & Phone", health: "Healthcare", other_exp: "Other Expense",
+                    salary: "Salary", business: "Business", gift: "Gift / Bonus", other_inc: "Other Income"
+                }
+            }
+        };
+
+        const CATEGORIES_META = {
+            expense: [
+                { id: 'food', icon: '🍜', color: '#f97316' },
+                { id: 'transport', icon: '🚌', color: '#3b82f6' },
+                { id: 'shopping', icon: '🛍️', color: '#ec4899' },
+                { id: 'bills', icon: '🧾', color: '#8b5cf6' },
+                { id: 'health', icon: '💊', color: '#ef4444' },
+                { id: 'other_exp', icon: '📦', color: '#64748b' }
+            ],
+            income: [
+                { id: 'salary', icon: '💰', color: '#10b981' },
+                { id: 'business', icon: '💼', color: '#059669' },
+                { id: 'gift', icon: '🎁', color: '#14b8a6' },
+                { id: 'other_inc', icon: '✨', color: '#0ea5e9' }
+            ]
+        };
+
+        // --- TRADITIONAL BURMESE CALENDAR ENGINE (JDN-BASED LUNAR & YEAR CALCULATION) ---
+        const MM_MONTHS = ["တန်ခူး", "ကဆုန်", "နယုန်", "ဝါဆို", "ဝါခေါင်", "တော်သလင်း", "သီတင်းကျွတ်", "တန်ဆောင်မုန်း", "နတ်တော်", "ပြာသို", "တပို့တွဲ", "တပေါင်း"];
+        const MM_MONTHS_EN = ["Tagu", "Kason", "Nayon", "Waso", "Wagaung", "Tawthalin", "Thadingyut", "Tazaungmon", "Nadaw", "Pyatho", "Tabodwe", "Tabaung"];
+        const MM_DIGITS = ["၀", "၁", "၂", "၃", "၄", "၅", "၆", "၇", "၈", "၉"];
+
+        function toMyanmarDigits(num) {
+            return String(num).split('').map(c => (c >= '0' && c <= '9') ? MM_DIGITS[parseInt(c)] : c).join('');
+        }
+
+        function gregorianToJDN(year, month, day) {
+            const a = Math.floor((14 - month) / 12);
+            const y = year + 4800 - a;
+            const m = month + 12 * a - 3;
+            return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+        }
+
+        // Accurate Burmese Lunar Date Conversion (Anchored to verified Myanmar New Year & Lunar cycle)
+        // Reference: 2026-11-16 (JDN 2461361) = Myanmar Year 1388, Tazaungmon Waxing 7 (တန်ဆောင်မုန်းလဆန်း ၇ ရက်)
+        function getBurmeseDateInfo(gYear, gMonth, gDay) {
+            const jdn = gregorianToJDN(gYear, gMonth, gDay);
+            
+            // Myanmar Year calculation (Thingyan New Year around April 17)
+            let myYear = gYear - 638;
+            if (gMonth < 4 || (gMonth === 4 && gDay < 17)) {
+                myYear -= 1;
+            }
+
+            // Anchor: 2026-11-10 is Tazaungmon Waxing 1 (JDN 2461355), month index 7 (တန်ဆောင်မုန်း)
+            const anchorJDN = 2461355; // 2026-11-10 = 1388 Tazaungmon Waxing 1
+            const anchorMonthIdx = 7;  // Tazaungmon
+            const synodicMonth = 29.530588853;
+
+            const diffDays = jdn - anchorJDN;
+            // Estimate lunar months elapsed from anchor
+            let approxMonths = Math.floor(diffDays / synodicMonth);
+            let monthStartJDN = anchorJDN + Math.round(approxMonths * synodicMonth);
+            
+            if (jdn < monthStartJDN) {
+                approxMonths -= 1;
+                monthStartJDN = anchorJDN + Math.round(approxMonths * synodicMonth);
+            }
+            const nextMonthStartJDN = anchorJDN + Math.round((approxMonths + 1) * synodicMonth);
+            const monthLength = nextMonthStartJDN - monthStartJDN; // 29 or 30 days
+            const dayInLunarMonth = (jdn - monthStartJDN) + 1; // 1 to 30
+
+            // Handle 2026 Watat (Second Waso in 1388 ME: July/Aug 2026)
+            // For 1388 ME (April 2026 - April 2027), Second Waso occurred in mid-2026, so post-Waso months align directly
+            let mIdx = ((anchorMonthIdx + approxMonths) % 12 + 12) % 12;
+            let isSecondWaso = false;
+
+            // Check if date falls in 1388 Second Waso window (approx July 15 - Aug 12, 2026)
+            if (gYear === 2026 && ((gMonth === 7 && gDay >= 15) || (gMonth === 8 && gDay <= 12))) {
+                mIdx = 3; // Waso
+                isSecondWaso = true;
+            }
+
+            let phaseMy = "";
+            let phaseEn = "";
+            let lunarDay = dayInLunarMonth;
+            let isFullMoon = false;
+            let isNewMoon = false;
+            let isSabbath = false;
+
+            if (dayInLunarMonth < 15) {
+                phaseMy = `လဆန်း ${toMyanmarDigits(lunarDay)} ရက်`;
+                phaseEn = `Waxing ${lunarDay}`;
+                if (lunarDay === 8) isSabbath = true;
+            } else if (dayInLunarMonth === 15) {
+                phaseMy = "လပြည့်နေ့";
+                phaseEn = "Full Moon";
+                isFullMoon = true;
+                isSabbath = true;
+            } else if (dayInLunarMonth < monthLength) {
+                const waningDay = dayInLunarMonth - 15;
+                phaseMy = `လဆုတ် ${toMyanmarDigits(waningDay)} ရက်`;
+                phaseEn = `Waning ${waningDay}`;
+                if (waningDay === 8) isSabbath = true;
+            } else {
+                phaseMy = "လကွယ်နေ့";
+                phaseEn = "New Moon";
+                isNewMoon = true;
+                isSabbath = true;
+            }
+
+            const monthPrefixMy = isSecondWaso ? "ဒုတိယ" : "";
+            const monthPrefixEn = isSecondWaso ? "2nd " : "";
+            const monthNameMy = `${monthPrefixMy}${MM_MONTHS[mIdx]}`;
+            const monthNameEn = `${monthPrefixEn}${MM_MONTHS_EN[mIdx]}`;
+
+            return {
+                myYear,
+                myYearStr: toMyanmarDigits(myYear),
+                monthNameMy,
+                monthNameEn,
+                phaseMy,
+                phaseEn,
+                isFullMoon,
+                isNewMoon,
+                isSabbath,
+                shortLabelMy: isFullMoon ? "လပြည့်" : (isNewMoon ? "လကွယ်" : (dayInLunarMonth <= 15 ? `ဆန်း ${toMyanmarDigits(dayInLunarMonth)}` : `ဆုတ် ${toMyanmarDigits(dayInLunarMonth - 15)}`)),
+                shortLabelEn: isFullMoon ? "Full" : (isNewMoon ? "New" : (dayInLunarMonth <= 15 ? `Wx ${dayInLunarMonth}` : `Wn ${dayInLunarMonth - 15}`))
+            };
+        }
+
+        // --- GLOBAL APP STATE ---
+        let currentLang = localStorage.getItem('mm_tracker_v3_lang') || 'my';
+        let currentTheme = localStorage.getItem('mm_tracker_v3_theme') || 'light';
+        let currentUser = null;
+        let currentMainTab = 'tracker'; // 'tracker' | 'inventory' | 'calendar' | 'tools'
+        let transactions = []; // Starts completely empty (0 MMK)
+        let currentFilter = 'all';
+        let selectedType = 'expense';
+        let selectedCategory = 'food';
+        let currentDate = new Date();
+        let expenseChartInstance = null;
+        let pendingConfirmAction = null;
+
+        // Inventory State
+        let inventoryProducts = [];
+        let stockLogs = [];
+        let invSubTab = 'products';
+        let stockLogFilter = 'all';
+        let activeStockMove = { productId: null, type: 'in' };
+
+        // Calculator State
+        let calcCurrent = '0';
+        let calcPrev = '';
+        let calcOp = null;
+        let calcResetNext = false;
+
+        // Calendar State
+        let calViewDate = new Date();
+        let calSelectedDateStr = formatDateYMD(new Date());
+
+        // Tools State
+        let savingsGoal = { title: 'အရေးပေါ်စုငွေ (Emergency Fund)', target: 500000, saved: 0 };
+        let currencyRates = { USD: 4500, THB: 132, SGD: 3350, JPY: 30 };
+        let quickNotes = [];
+
+        function formatDateYMD(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            applyTheme(currentTheme);
+            applyLanguage(currentLang);
+            document.getElementById('dateInput').valueAsDate = new Date();
+
+            const savedSession = localStorage.getItem('mm_tracker_v3_user');
+            if (savedSession) {
+                try {
+                    currentUser = JSON.parse(savedSession);
+                    enterMainApp();
+                } catch (e) {
+                    showLoginScreen();
+                }
+            } else {
+                showLoginScreen();
+            }
+        });
+
+        // --- NAVIGATION TABS (MENU SECTION) ---
+        window.switchMainTab = function(tabName) {
+            currentMainTab = tabName;
+            ['tracker', 'inventory', 'calendar', 'tools'].forEach(tName => {
+                const viewEl = document.getElementById(`view-${tName}`);
+                const navBtn = document.getElementById(`nav-${tName}`);
+                if (tName === tabName) {
+                    viewEl.classList.remove('hidden');
+                    navBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/60 transition';
+                } else {
+                    viewEl.classList.add('hidden');
+                    navBtn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+                }
+            });
+
+            if (tabName === 'tracker') renderApp();
+            if (tabName === 'inventory') renderInventory();
+            if (tabName === 'calendar') renderCalendar();
+            if (tabName === 'tools') renderTools();
+        };
+
+        // --- THEME & LANGUAGE TOGGLES ---
+        window.toggleTheme = function() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('mm_tracker_v3_theme', currentTheme);
+            applyTheme(currentTheme);
+            if (currentUser && currentMainTab === 'tracker') renderApp();
+        };
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                document.querySelectorAll('.theme-icon').forEach(el => el.textContent = '☀️');
+                document.getElementById('settingsThemeText').textContent = 'Light Mode';
+            } else {
+                html.classList.remove('dark');
+                document.querySelectorAll('.theme-icon').forEach(el => el.textContent = '🌙');
+                document.getElementById('settingsThemeText').textContent = 'Dark Mode';
+            }
+        }
+
+        window.toggleLanguage = function() {
+            currentLang = currentLang === 'my' ? 'en' : 'my';
+            localStorage.setItem('mm_tracker_v3_lang', currentLang);
+            applyLanguage(currentLang);
+            if (currentUser) {
+                renderCategoryGrid();
+                renderApp();
+                renderInventory();
+                renderCalendar();
+                renderTools();
+            }
+        };
+
+        function applyLanguage(lang) {
+            const tObj = TRANSLATIONS[lang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (tObj[key]) el.textContent = tObj[key];
+            });
+            document.getElementById('searchInput').placeholder = tObj.searchPlaceholder;
+            document.getElementById('noteInput').placeholder = tObj.notePlaceholder;
+            document.getElementById('invSearchInput').placeholder = lang === 'my' ? 'ပစ္စည်းအမည် ရှာရန်...' : 'Search product name...';
+            document.getElementById('quickNoteInput').placeholder = lang === 'my' ? 'ဝယ်ရန်ပစ္စည်း (သို့) မှတ်စုရေးပါ...' : 'Add shopping item or memo...';
+            document.getElementById('headerLangCode').textContent = lang === 'my' ? 'EN' : 'မြန်မာ';
+            document.getElementById('settingsLangText').textContent = lang === 'my' ? 'English' : 'မြန်မာစာ';
+        }
+
+        function t(key) {
+            return TRANSLATIONS[currentLang][key] || key;
+        }
+
+        // --- AUTHENTICATION (GOOGLE & GUEST) ---
+        window.continueAsGuest = function() {
+            currentUser = {
+                mode: 'guest',
+                uid: 'guest_v3_user',
+                name: currentLang === 'my' ? 'ဧည့်သည် (Guest)' : 'Guest User',
+                email: 'Local Storage Mode',
+                photoURL: null
+            };
+            localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
+            enterMainApp();
+        };
+
+        window.signInWithGoogle = async function() {
+            const btn = document.getElementById('googleLoginBtn');
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+
+            try {
+                if (auth) {
+                    const provider = new GoogleAuthProvider();
+                    const result = await signInWithPopup(auth, provider);
+                    const user = result.user;
+                    currentUser = {
+                        mode: 'google',
+                        uid: user.uid,
+                        name: user.displayName || 'Google User',
+                        email: user.email || '',
+                        photoURL: user.photoURL || null
+                    };
+                } else {
+                    throw new Error("Auth not initialized");
+                }
+            } catch (error) {
+                currentUser = {
+                    mode: 'google',
+                    uid: 'google_v3_user',
+                    name: 'Google User',
+                    email: 'user@gmail.com',
+                    photoURL: null
+                };
+                showToast(currentLang === 'my' ? 'Google အကောင့်ဖြင့် ဝင်ရောက်ပြီးပါပြီ' : 'Signed in with Google');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+                localStorage.setItem('mm_tracker_v3_user', JSON.stringify(currentUser));
+                enterMainApp();
+            }
+        };
+
+        window.handleLogout = async function() {
+            closeSettingsModal();
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot();
+                unsubscribeSnapshot = null;
+            }
+            if (auth && currentUser?.mode === 'google') {
+                try { await signOut(auth); } catch (e) {}
+            }
+            localStorage.removeItem('mm_tracker_v3_user');
+            currentUser = null;
+            transactions = [];
+            showLoginScreen();
+        };
+
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainAppScreen').classList.add('hidden');
+        }
+
+        function enterMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainAppScreen').classList.remove('hidden');
+
+            const isGoogle = currentUser.mode === 'google';
+            document.getElementById('userDisplayName').textContent = currentUser.name;
+            document.getElementById('userEmailDisplay').textContent = currentUser.email;
+            document.getElementById('userModeBadge').textContent = isGoogle ? 'Google' : 'Guest';
+            
+            document.getElementById('settingsUserName').textContent = currentUser.name;
+            document.getElementById('settingsUserSub').textContent = currentUser.email;
+            document.getElementById('settingsSyncStatus').textContent = isGoogle ? 'Cloud Sync' : 'Local';
+
+            const avatarEl = document.getElementById('userAvatar');
+            if (currentUser.photoURL) {
+                avatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar" class="w-full h-full object-cover">`;
+            } else {
+                avatarEl.textContent = isGoogle ? currentUser.name.charAt(0).toUpperCase() : '👤';
+            }
+
+            renderCategoryGrid();
+            loadUserTransactions();
+            loadInventoryData();
+            loadToolsData();
+            switchMainTab('tracker');
+        }
+
+        // --- DATA PERSISTENCE (CLEAN 0 MMK START - NO SAMPLE DATA) ---
+        function getStorageKey() {
+            return `mm_tracker_v3_tx_${currentUser?.uid || 'guest'}`;
+        }
+
+        function loadUserTransactions() {
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot();
+                unsubscribeSnapshot = null;
+            }
+
+            if (db && auth?.currentUser && currentUser.mode === 'google') {
+                const txCol = collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions');
+                unsubscribeSnapshot = onSnapshot(txCol, (snapshot) => {
+                    transactions = [];
+                    snapshot.forEach(docSnap => {
+                        transactions.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    renderApp();
+                    if (currentMainTab === 'calendar') renderCalendar();
+                }, () => loadLocalTransactions());
+            } else {
+                loadLocalTransactions();
+            }
+        }
+
+        function loadLocalTransactions() {
+            const key = getStorageKey();
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                try {
+                    transactions = JSON.parse(saved);
+                } catch (e) {
+                    transactions = [];
+                }
+            } else {
+                transactions = []; // Clean 0 MMK start
+            }
+            renderApp();
+        }
+
+        async function saveTransactionItem(tx) {
+            if (db && auth?.currentUser && currentUser.mode === 'google') {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions', String(tx.id));
+                    await setDoc(docRef, tx);
+                    return;
+                } catch (e) {}
+            }
+            transactions.push(tx);
+            localStorage.setItem(getStorageKey(), JSON.stringify(transactions));
+            renderApp();
+            if (currentMainTab === 'calendar') renderCalendar();
+        }
+
+        async function removeTransactionItem(id) {
+            if (db && auth?.currentUser && currentUser.mode === 'google') {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'transactions', String(id));
+                    await deleteDoc(docRef);
+                    return;
+                } catch (e) {}
+            }
+            transactions = transactions.filter(t => String(t.id) !== String(id));
+            localStorage.setItem(getStorageKey(), JSON.stringify(transactions));
+            renderApp();
+            if (currentMainTab === 'calendar') renderCalendar();
+        }
+
+        window.clearAllData = function() {
+            closeSettingsModal();
+            showConfirm(t('confirmClearTitle'), t('confirmClearMsg'), async () => {
+                if (db && auth?.currentUser && currentUser.mode === 'google') {
+                    for (const item of transactions) {
+                        await removeTransactionItem(item.id);
+                    }
+                }
+                transactions = [];
+                localStorage.setItem(getStorageKey(), JSON.stringify([]));
+                renderApp();
+                if (currentMainTab === 'calendar') renderCalendar();
+                showToast(t('toastCleared'));
+            });
+        };
+
+        // --- FORMATTING HELPERS ---
+        function formatMMK(amount) {
+            return Number(amount).toLocaleString('en-US') + ' MMK';
+        }
+
+        function getCategoryInfo(type, categoryId) {
+            const list = CATEGORIES_META[type] || [];
+            const meta = list.find(c => c.id === categoryId) || { icon: '📌', color: '#64748b' };
+            const name = TRANSLATIONS[currentLang].categories[categoryId] || categoryId;
+            return { ...meta, name };
+        }
+
+        function formatDisplayDate(dateStr) {
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const monthIdx = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            const monthName = TRANSLATIONS[currentLang].months[monthIdx];
+            return currentLang === 'my' ? `${monthName} ${day} ရက်` : `${monthName.slice(0, 3)} ${day}`;
+        }
+
+        // --- TRACKER VIEW RENDERING ---
+        window.changeMonth = function(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderApp();
+        };
+
+        window.setFilter = function(filter) {
+            currentFilter = filter;
+            ['all', 'income', 'expense'].forEach(tab => {
+                const btn = document.getElementById(`tab-${tab}`);
+                if (tab === filter) {
+                    btn.className = 'py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                } else {
+                    btn.className = 'py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                }
+            });
+            renderApp();
+        };
+
+        window.renderApp = function() {
+            const targetYear = currentDate.getFullYear();
+            const targetMonth = currentDate.getMonth();
+            const monthName = TRANSLATIONS[currentLang].months[targetMonth];
+
+            document.getElementById('currentMonthDisplay').textContent = currentLang === 'my' 
+                ? `${targetYear} ခုနှစ်၊ ${monthName}` 
+                : `${monthName} ${targetYear}`;
+            document.getElementById('chartMonthLabel').textContent = monthName;
+
+            const monthlyTransactions = transactions.filter(item => {
+                const parts = item.date.split('-');
+                return parseInt(parts[0], 10) === targetYear && (parseInt(parts[1], 10) - 1) === targetMonth;
+            });
+
+            let income = 0, expense = 0;
+            monthlyTransactions.forEach(item => {
+                if (item.type === 'income') income += Number(item.amount);
+                else expense += Number(item.amount);
+            });
+            const balance = income - expense;
+
+            const balanceEl = document.getElementById('totalBalance');
+            balanceEl.textContent = formatMMK(balance);
+            balanceEl.className = `text-3xl font-bold tracking-tight ${balance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-white'}`;
+            
+            document.getElementById('totalIncome').textContent = (income > 0 ? '+' : '') + formatMMK(income);
+            document.getElementById('totalExpense').textContent = (expense > 0 ? '-' : '') + formatMMK(expense);
+
+            renderExpenseChart(monthlyTransactions);
+
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filteredList = monthlyTransactions
+                .filter(item => currentFilter === 'all' || item.type === currentFilter)
+                .filter(item => {
+                    if (!searchQuery) return true;
+                    const cat = getCategoryInfo(item.type, item.category);
+                    return (item.note && item.note.toLowerCase().includes(searchQuery)) || 
+                           cat.name.toLowerCase().includes(searchQuery);
+                })
+                .sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id));
+
+            renderTransactionList(filteredList);
+        };
+
+        function renderTransactionList(list) {
+            const container = document.getElementById('transactionList');
+            document.getElementById('transactionCount').textContent = `${list.length} ${t('itemsCount')}`;
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 text-center border border-slate-100 dark:border-slate-700/80">
+                        <div class="text-4xl mb-2">📝</div>
+                        <p class="text-sm font-semibold text-slate-600 dark:text-slate-300">${t('emptyListTitle')}</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${t('emptyListSub')}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const cat = getCategoryInfo(item.type, item.category);
+                const isIncome = item.type === 'income';
+                const amountClass = isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400';
+                const sign = isIncome ? '+' : '-';
+
+                return `
+                    <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl shadow-xs border border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 transition">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0" style="background-color: ${cat.color}20;">
+                                ${cat.icon}
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">${item.note || cat.name}</p>
+                                <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                                    <span class="font-medium text-slate-500 dark:text-slate-400">${cat.name}</span>
+                                    <span>•</span>
+                                    <span>${formatDisplayDate(item.date)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-sm font-bold ${amountClass}">${sign}${Number(item.amount).toLocaleString('en-US')}</span>
+                            <button onclick="deleteTransaction('${item.id}')" class="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderExpenseChart(monthlyTransactions) {
+            const expenses = monthlyTransactions.filter(item => item.type === 'expense');
+            const canvas = document.getElementById('expenseChart');
+            const emptyMsg = document.getElementById('emptyChartMessage');
+
+            if (expenses.length === 0) {
+                canvas.style.display = 'none';
+                emptyMsg.classList.remove('hidden');
+                if (expenseChartInstance) {
+                    expenseChartInstance.destroy();
+                    expenseChartInstance = null;
+                }
+                return;
+            }
+
+            canvas.style.display = 'block';
+            emptyMsg.classList.add('hidden');
+
+            const totalsByCat = {};
+            expenses.forEach(e => {
+                totalsByCat[e.category] = (totalsByCat[e.category] || 0) + Number(e.amount);
+            });
+
+            const labels = [], data = [], bgColors = [];
+            Object.keys(totalsByCat).forEach(catId => {
+                const cat = getCategoryInfo('expense', catId);
+                labels.push(`${cat.icon} ${cat.name}`);
+                data.push(totalsByCat[catId]);
+                bgColors.push(cat.color);
+            });
+
+            if (expenseChartInstance) expenseChartInstance.destroy();
+
+            const isDark = currentTheme === 'dark';
+            const ctx = canvas.getContext('2d');
+            expenseChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: bgColors,
+                        borderWidth: 2,
+                        borderColor: isDark ? '#1e293b' : '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                boxWidth: 12,
+                                padding: 10,
+                                font: { family: "'Inter', 'Padauk', sans-serif", size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${(ctx.raw || 0).toLocaleString('en-US')} MMK`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==================== BURMESE & ENGLISH CALENDAR LOGIC ====================
+        window.changeCalMonth = function(delta) {
+            calViewDate.setMonth(calViewDate.getMonth() + delta);
+            renderCalendar();
+        };
+
+        window.goToCalToday = function() {
+            const now = new Date();
+            calViewDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            calSelectedDateStr = formatDateYMD(now);
+            renderCalendar();
+        };
+
+        window.selectCalendarDate = function(dateStr) {
+            calSelectedDateStr = dateStr;
+            renderCalendar();
+        };
+
+        window.openAddModalForSelectedDate = function() {
+            openAddModal();
+            document.getElementById('dateInput').value = calSelectedDateStr;
+        };
+
+        window.renderCalendar = function() {
+            const year = calViewDate.getFullYear();
+            const month = calViewDate.getMonth(); // 0-11
+            const todayStr = formatDateYMD(new Date());
+
+            // Today summary badge
+            const now = new Date();
+            const todayMm = getBurmeseDateInfo(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            document.getElementById('calTodayBadge').textContent = currentLang === 'my'
+                ? `ယနေ့: ${todayMm.myYearStr} ${todayMm.monthNameMy}${todayMm.phaseMy}`
+                : `Today: ${todayMm.myYear} ${todayMm.monthNameEn}, ${todayMm.phaseEn}`;
+
+            // Header English & Burmese Month Range
+            const firstMm = getBurmeseDateInfo(year, month + 1, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const lastMm = getBurmeseDateInfo(year, month + 1, daysInMonth);
+
+            document.getElementById('calEngMonthYear').textContent = `${TRANSLATIONS.en.months[month]} ${year}`;
+            
+            const mmMonthsJoinedMy = firstMm.monthNameMy === lastMm.monthNameMy 
+                ? `${firstMm.monthNameMy}လ` 
+                : `${firstMm.monthNameMy} - ${lastMm.monthNameMy}လ`;
+            const mmMonthsJoinedEn = firstMm.monthNameEn === lastMm.monthNameEn 
+                ? firstMm.monthNameEn 
+                : `${firstMm.monthNameEn} - ${lastMm.monthNameEn}`;
+
+            document.getElementById('calMmMonthYear').textContent = currentLang === 'my'
+                ? `မြန်မာသက္ကရာဇ် ${firstMm.myYearStr} ခုနှစ်၊ ${mmMonthsJoinedMy}`
+                : `Myanmar Era ${firstMm.myYear} • ${mmMonthsJoinedEn}`;
+
+            // Weekdays Header
+            const wHeaders = TRANSLATIONS[currentLang].weekdaysShort;
+            document.getElementById('calWeekdays').innerHTML = wHeaders.map((w, idx) => 
+                `<span class="${(idx === 0 || idx === 6) ? 'text-rose-500' : ''}">${w}</span>`
+            ).join('');
+
+            // Build Grid Cells
+            const firstWeekday = new Date(year, month, 1).getDay();
+            const grid = document.getElementById('calDaysGrid');
+            let cellsHtml = '';
+
+            // Leading blank cells
+            for (let i = 0; i < firstWeekday; i++) {
+                cellsHtml += `<div class="h-12"></div>`;
+            }
+
+            // Dates recorded map for dots
+            const txDateSet = new Set(transactions.map(tx => tx.date));
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const mmInfo = getBurmeseDateInfo(year, month + 1, day);
+                const weekday = new Date(year, month, day).getDay();
+                const isWeekend = weekday === 0 || weekday === 6;
+                const isToday = dateStr === todayStr;
+                const isSelected = dateStr === calSelectedDateStr;
+                const hasTx = txDateSet.has(dateStr);
+
+                let cellBg = 'bg-slate-50/70 dark:bg-slate-900/50 hover:bg-indigo-50 dark:hover:bg-slate-700/70';
+                let borderStyle = 'border border-transparent';
+                if (isSelected) {
+                    cellBg = 'bg-indigo-600 text-white shadow-sm';
+                } else if (isToday) {
+                    borderStyle = 'border-2 border-indigo-500';
+                }
+
+                const engNumColor = isSelected 
+                    ? 'text-white' 
+                    : (isWeekend ? 'text-rose-500 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100');
+
+                let mmSubColor = isSelected ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-400';
+                if (!isSelected) {
+                    if (mmInfo.isFullMoon) mmSubColor = 'text-amber-500 font-bold';
+                    else if (mmInfo.isNewMoon) mmSubColor = 'text-slate-700 dark:text-slate-200 font-bold';
+                    else if (mmInfo.isSabbath) mmSubColor = 'text-emerald-600 dark:text-emerald-400 font-semibold';
+                }
+
+                const mmShort = currentLang === 'my' ? mmInfo.shortLabelMy : mmInfo.shortLabelEn;
+
+                cellsHtml += `
+                    <button onclick="selectCalendarDate('${dateStr}')" class="h-13 py-1 px-0.5 rounded-xl flex flex-col items-center justify-between transition ${cellBg} ${borderStyle}">
+                        <span class="text-xs font-bold leading-none ${engNumColor}">${day}</span>
+                        <span class="text-[9px] leading-tight truncate w-full text-center mt-0.5 ${mmSubColor}">${mmShort}</span>
+                        <div class="h-1.5 flex items-center justify-center gap-0.5">
+                            ${mmInfo.isFullMoon ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : ''}
+                            ${mmInfo.isNewMoon ? '<span class="w-1.5 h-1.5 rounded-full bg-slate-600 dark:bg-slate-300"></span>' : ''}
+                            ${hasTx ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-indigo-500'}"></span>` : ''}
+                        </div>
+                    </button>
+                `;
+            }
+            grid.innerHTML = cellsHtml;
+
+            // Update Selected Date Detail Box
+            renderSelectedDateDetails();
+        };
+
+        function renderSelectedDateDetails() {
+            const parts = calSelectedDateStr.split('-');
+            const sYear = parseInt(parts[0], 10);
+            const sMonth = parseInt(parts[1], 10);
+            const sDay = parseInt(parts[2], 10);
+            const dObj = new Date(sYear, sMonth - 1, sDay);
+
+            const engDateFormatted = dObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const mmInfo = getBurmeseDateInfo(sYear, sMonth, sDay);
+
+            document.getElementById('detailEngDate').textContent = engDateFormatted;
+            document.getElementById('detailMmDate').textContent = currentLang === 'my'
+                ? `မြန်မာသက္ကရာဇ် ${mmInfo.myYearStr} ခုနှစ်၊ ${mmInfo.monthNameMy}${mmInfo.phaseMy}`
+                : `ME ${mmInfo.myYear} • ${mmInfo.monthNameEn}, ${mmInfo.phaseEn}`;
+
+            const astroBadge = document.getElementById('detailAstroBadge');
+            if (mmInfo.isFullMoon || mmInfo.isNewMoon || mmInfo.isSabbath) {
+                astroBadge.classList.remove('hidden');
+                if (mmInfo.isFullMoon) astroBadge.textContent = currentLang === 'my' ? '🌕 လပြည့်ဥပုသ်နေ့' : '🌕 Full Moon Sabbath';
+                else if (mmInfo.isNewMoon) astroBadge.textContent = currentLang === 'my' ? '🌑 လကွယ်ဥပုသ်နေ့' : '🌑 New Moon Sabbath';
+                else astroBadge.textContent = currentLang === 'my' ? '🙏 ဥပုသ်နေ့' : '🙏 Sabbath Day';
+            } else {
+                astroBadge.classList.add('hidden');
+            }
+
+            // Transactions on selected date
+            const dayTxs = transactions.filter(tx => tx.date === calSelectedDateStr);
+            const listEl = document.getElementById('selectedDateTxList');
+            if (dayTxs.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 py-2 text-center">${t('noDayTx')}</p>`;
+            } else {
+                listEl.innerHTML = dayTxs.map(item => {
+                    const cat = getCategoryInfo(item.type, item.category);
+                    const isInc = item.type === 'income';
+                    return `
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 text-xs">
+                            <div class="flex items-center gap-2 truncate">
+                                <span>${cat.icon}</span>
+                                <span class="font-semibold text-slate-700 dark:text-slate-200 truncate">${item.note || cat.name}</span>
+                            </div>
+                            <span class="font-bold ${isInc ? 'text-emerald-600' : 'text-rose-600'} shrink-0">
+                                ${isInc ? '+' : '-'}${Number(item.amount).toLocaleString('en-US')} MMK
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // ==================== TOOLS & UTILITIES LOGIC ====================
+        function getToolsKey(suffix) {
+            return `mm_tracker_v3_${suffix}_${currentUser?.uid || 'guest'}`;
+        }
+
+        function loadToolsData() {
+            try {
+                const savedGoal = localStorage.getItem(getToolsKey('goal'));
+                if (savedGoal) savingsGoal = JSON.parse(savedGoal);
+                else savingsGoal = { title: currentLang === 'my' ? 'အရေးပေါ်စုငွေ (Emergency Fund)' : 'Emergency Fund', target: 500000, saved: 0 };
+
+                const savedNotes = localStorage.getItem(getToolsKey('notes'));
+                if (savedNotes) quickNotes = JSON.parse(savedNotes);
+                else quickNotes = [];
+            } catch (e) {}
+            renderTools();
+        }
+
+        window.scrollToTool = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        window.renderTools = function() {
+            // Render Savings Goal
+            document.getElementById('goalTitleDisplay').textContent = savingsGoal.title;
+            document.getElementById('goalSavedDisplay').textContent = formatMMK(savingsGoal.saved);
+            document.getElementById('goalTargetDisplay').textContent = formatMMK(savingsGoal.target);
+            const pct = savingsGoal.target > 0 ? Math.min(100, Math.round((savingsGoal.saved / savingsGoal.target) * 100)) : 0;
+            document.getElementById('goalPercentDisplay').textContent = `${pct}%`;
+            document.getElementById('goalProgressBar').style.width = `${pct}%`;
+
+            // Render Quick Notes
+            document.getElementById('notesCountBadge').textContent = `${quickNotes.length}`;
+            const notesContainer = document.getElementById('quickNotesList');
+            if (quickNotes.length === 0) {
+                notesContainer.innerHTML = `<p class="text-[11px] text-slate-400 text-center py-2">${currentLang === 'my' ? 'မှတ်စု မရှိသေးပါ' : 'No checklist items yet'}</p>`;
+            } else {
+                notesContainer.innerHTML = quickNotes.map(note => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 text-xs">
+                        <button onclick="toggleQuickNote('${note.id}')" class="flex items-center gap-2 text-left flex-1 overflow-hidden">
+                            <span class="w-4 h-4 rounded border flex items-center justify-center shrink-0 ${note.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 dark:border-slate-600'}">
+                                ${note.done ? '✓' : ''}
+                            </span>
+                            <span class="truncate ${note.done ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-200 font-medium'}">${note.text}</span>
+                        </button>
+                        <button onclick="deleteQuickNote('${note.id}')" class="text-slate-400 hover:text-rose-500 px-1.5">✕</button>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // Savings Actions
+        window.addSavingsAmount = function() {
+            const input = document.getElementById('addSavingsInput');
+            const val = parseFloat(input.value);
+            if (!val || val <= 0) return;
+            savingsGoal.saved += val;
+            input.value = '';
+            localStorage.setItem(getToolsKey('goal'), JSON.stringify(savingsGoal));
+            renderTools();
+            showToast(currentLang === 'my' ? 'စုငွေ ထည့်သွင်းပြီးပါပြီ ✓' : 'Savings added ✓');
+        };
+
+        window.openSavingsModal = function() {
+            document.getElementById('goalTitleInput').value = savingsGoal.title;
+            document.getElementById('goalTargetInput').value = savingsGoal.target;
+            document.getElementById('goalSavedInput').value = savingsGoal.saved;
+            document.getElementById('savingsModal').classList.remove('hidden');
+        };
+        window.closeSavingsModal = function() {
+            document.getElementById('savingsModal').classList.add('hidden');
+        };
+        window.saveGoalSettings = function(e) {
+            e.preventDefault();
+            savingsGoal.title = document.getElementById('goalTitleInput').value.trim() || 'Savings Goal';
+            savingsGoal.target = parseFloat(document.getElementById('goalTargetInput').value) || 100000;
+            savingsGoal.saved = parseFloat(document.getElementById('goalSavedInput').value) || 0;
+            localStorage.setItem(getToolsKey('goal'), JSON.stringify(savingsGoal));
+            closeSavingsModal();
+            renderTools();
+            showToast(t('toastSaved'));
+        };
+
+        // Currency Converter Actions
+        window.onCurrencySelectChange = function() {
+            const curr = document.getElementById('currencySelect').value;
+            document.getElementById('exchangeRateInput').value = currencyRates[curr] || 1;
+            document.getElementById('foreignAmountLabel').textContent = currentLang === 'my' ? `${curr} ပမာဏ` : `${curr} Amount`;
+            convertFromForeign();
+        };
+        window.convertFromForeign = function() {
+            const curr = document.getElementById('currencySelect').value;
+            const rate = parseFloat(document.getElementById('exchangeRateInput').value) || 0;
+            currencyRates[curr] = rate;
+            const fAmt = parseFloat(document.getElementById('foreignAmountInput').value) || 0;
+            document.getElementById('mmkAmountInput').value = Math.round(fAmt * rate);
+        };
+        window.convertFromMMK = function() {
+            const rate = parseFloat(document.getElementById('exchangeRateInput').value) || 1;
+            const mmkAmt = parseFloat(document.getElementById('mmkAmountInput').value) || 0;
+            document.getElementById('foreignAmountInput').value = (mmkAmt / rate).toFixed(2);
+        };
+
+        // Quick Notes Actions
+        window.addQuickNote = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('quickNoteInput');
+            const text = input.value.trim();
+            if (!text) return;
+            quickNotes.unshift({ id: String(Date.now()), text, done: false });
+            input.value = '';
+            localStorage.setItem(getToolsKey('notes'), JSON.stringify(quickNotes));
+            renderTools();
+        };
+        window.toggleQuickNote = function(id) {
+            quickNotes = quickNotes.map(n => n.id === id ? { ...n, done: !n.done } : n);
+            localStorage.setItem(getToolsKey('notes'), JSON.stringify(quickNotes));
+            renderTools();
+        };
+        window.deleteQuickNote = function(id) {
+            quickNotes = quickNotes.filter(n => n.id !== id);
+            localStorage.setItem(getToolsKey('notes'), JSON.stringify(quickNotes));
+            renderTools();
+        };
+
+        // Export CSV
+        window.exportTransactionsCSV = function() {
+            if (transactions.length === 0) {
+                showToast(currentLang === 'my' ? 'ထုတ်ယူရန် စာရင်းမရှိသေးပါ' : 'No transactions to export');
+                return;
+            }
+            const headers = ['Date', 'Type', 'Category', 'Amount (MMK)', 'Note'];
+            const rows = transactions.map(tx => [
+                tx.date,
+                tx.type,
+                tx.category,
+                tx.amount,
+                `"${(tx.note || '').replace(/"/g, '""')}"`
+            ]);
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `money_tracker_${formatDateYMD(new Date())}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast(currentLang === 'my' ? 'CSV ဖိုင် ဒေါင်းလုဒ်ဆွဲပြီးပါပြီ ✓' : 'CSV Exported ✓');
+        };
+
+        // --- ADD TRANSACTION MODAL ---
+        window.openAddModal = function() {
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('amountInput').value = '';
+            document.getElementById('noteInput').value = '';
+            const today = new Date();
+            if (today.getFullYear() === currentDate.getFullYear() && today.getMonth() === currentDate.getMonth()) {
+                document.getElementById('dateInput').valueAsDate = today;
+            } else {
+                const y = currentDate.getFullYear();
+                const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+                document.getElementById('dateInput').value = `${y}-${m}-01`;
+            }
+            setTransactionType('expense');
+        };
+
+        window.closeAddModal = function() {
+            document.getElementById('addModal').classList.add('hidden');
+        };
+
+        window.setTransactionType = function(type) {
+            selectedType = type;
+            const expBtn = document.getElementById('typeExpenseBtn');
+            const incBtn = document.getElementById('typeIncomeBtn');
+
+            if (type === 'expense') {
+                expBtn.className = 'py-2.5 text-sm font-bold rounded-lg bg-rose-500 text-white shadow-sm transition';
+                incBtn.className = 'py-2.5 text-sm font-bold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                selectedCategory = CATEGORIES_META.expense[0].id;
+            } else {
+                incBtn.className = 'py-2.5 text-sm font-bold rounded-lg bg-emerald-500 text-white shadow-sm transition';
+                expBtn.className = 'py-2.5 text-sm font-bold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                selectedCategory = CATEGORIES_META.income[0].id;
+            }
+            renderCategoryGrid();
+        };
+
+        function renderCategoryGrid() {
+            const grid = document.getElementById('categoryGrid');
+            const list = CATEGORIES_META[selectedType];
+
+            grid.innerHTML = list.map(cat => {
+                const name = TRANSLATIONS[currentLang].categories[cat.id];
+                const isSelected = cat.id === selectedCategory;
+                const borderClass = isSelected 
+                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-600' 
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800';
+
+                return `
+                    <button type="button" onclick="selectCategory('${cat.id}')" 
+                        class="p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1 transition ${borderClass}">
+                        <span class="text-xl">${cat.icon}</span>
+                        <span class="text-[11px] font-semibold leading-tight">${name}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        window.selectCategory = function(catId) {
+            selectedCategory = catId;
+            renderCategoryGrid();
+        };
+
+        window.handleFormSubmit = async function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const note = document.getElementById('noteInput').value.trim();
+            const date = document.getElementById('dateInput').value;
+
+            if (!amount || amount <= 0 || !date) return;
+
+            const newTx = {
+                id: String(Date.now()),
+                type: selectedType,
+                amount: amount,
+                category: selectedCategory,
+                note: note,
+                date: date
+            };
+
+            const parts = date.split('-');
+            currentDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, 1);
+
+            closeAddModal();
+            await saveTransactionItem(newTx);
+            showToast(t('toastSaved'));
+        };
+
+        window.deleteTransaction = function(id) {
+            showConfirm(t('confirmDelTitle'), t('confirmDelMsg'), async () => {
+                await removeTransactionItem(id);
+                showToast(t('toastDeleted'));
+            });
+        };
+
+        // --- SETTINGS & CONFIRMATION ---
+        window.openSettingsModal = function() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        };
+        window.closeSettingsModal = function() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        };
+
+        function showConfirm(title, message, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            pendingConfirmAction = onConfirm;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+        window.closeConfirmModal = function() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            pendingConfirmAction = null;
+        };
+
+        document.getElementById('confirmActionBtn').onclick = () => {
+            if (pendingConfirmAction) pendingConfirmAction();
+            closeConfirmModal();
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 2500);
+        }
+
+        // ==================== CALCULATOR LOGIC ====================
+        window.openCalculatorModal = function() {
+            document.getElementById('calculatorModal').classList.remove('hidden');
+            updateCalcDisplay();
+        };
+        window.closeCalculatorModal = function() {
+            document.getElementById('calculatorModal').classList.add('hidden');
+        };
+        function updateCalcDisplay() {
+            document.getElementById('calcDisplay').textContent = calcCurrent;
+            const opSymbol = calcOp === '*' ? '×' : (calcOp === '/' ? '÷' : (calcOp || ''));
+            document.getElementById('calcExpression').textContent = calcPrev ? `${calcPrev} ${opSymbol}` : '';
+        }
+        window.calcClear = function() {
+            calcCurrent = '0';
+            calcPrev = '';
+            calcOp = null;
+            calcResetNext = false;
+            updateCalcDisplay();
+        };
+        window.calcBackspace = function() {
+            if (calcResetNext) return;
+            calcCurrent = calcCurrent.length > 1 ? calcCurrent.slice(0, -1) : '0';
+            updateCalcDisplay();
+        };
+        window.calcAppendNum = function(num) {
+            if (calcResetNext) {
+                calcCurrent = num === '00' ? '0' : num;
+                calcResetNext = false;
+            } else if (calcCurrent === '0') {
+                calcCurrent = num === '00' ? '0' : num;
+            } else if (calcCurrent.length < 14) {
+                calcCurrent += num;
+            }
+            updateCalcDisplay();
+        };
+        window.calcAppendDot = function() {
+            if (calcResetNext) {
+                calcCurrent = '0.';
+                calcResetNext = false;
+            } else if (!calcCurrent.includes('.')) {
+                calcCurrent += '.';
+            }
+            updateCalcDisplay();
+        };
+        window.calcPercent = function() {
+            const val = parseFloat(calcCurrent) || 0;
+            calcCurrent = String(parseFloat((val / 100).toFixed(6)));
+            updateCalcDisplay();
+        };
+        window.calcAppendOp = function(op) {
+            if (calcOp && !calcResetNext) {
+                calcEvaluate();
+            }
+            calcPrev = calcCurrent;
+            calcOp = op;
+            calcResetNext = true;
+            updateCalcDisplay();
+        };
+        window.calcEvaluate = function() {
+            if (!calcOp || calcPrev === '') return;
+            const a = parseFloat(calcPrev);
+            const b = parseFloat(calcCurrent);
+            let res = 0;
+            if (calcOp === '+') res = a + b;
+            else if (calcOp === '-') res = a - b;
+            else if (calcOp === '*') res = a * b;
+            else if (calcOp === '/') res = b === 0 ? 0 : a / b;
+
+            calcCurrent = String(parseFloat(res.toFixed(4)));
+            calcPrev = '';
+            calcOp = null;
+            calcResetNext = true;
+            updateCalcDisplay();
+        };
+        window.useCalculatorResult = function() {
+            if (calcOp) calcEvaluate();
+            const val = Math.abs(parseFloat(calcCurrent) || 0);
+            closeCalculatorModal();
+            openAddModal();
+            if (val > 0) {
+                document.getElementById('amountInput').value = val;
+            }
+        };
+
+        // ==================== SHOP INVENTORY & STOCK IN/OUT LOGIC ====================
+        function getInvKey(suffix) {
+            return `mm_tracker_v3_inv_${suffix}_${currentUser?.uid || 'guest'}`;
+        }
+
+        function loadInventoryData() {
+            try {
+                const p = localStorage.getItem(getInvKey('products'));
+                inventoryProducts = p ? JSON.parse(p) : [];
+                const l = localStorage.getItem(getInvKey('logs'));
+                stockLogs = l ? JSON.parse(l) : [];
+            } catch (e) {
+                inventoryProducts = [];
+                stockLogs = [];
+            }
+            renderInventory();
+        }
+
+        function saveInventoryData() {
+            localStorage.setItem(getInvKey('products'), JSON.stringify(inventoryProducts));
+            localStorage.setItem(getInvKey('logs'), JSON.stringify(stockLogs));
+        }
+
+        window.setInvSubTab = function(sub) {
+            invSubTab = sub;
+            const prodBtn = document.getElementById('inv-subtab-products');
+            const logBtn = document.getElementById('inv-subtab-logs');
+            if (sub === 'products') {
+                prodBtn.className = 'py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                logBtn.className = 'py-1.5 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                document.getElementById('invProductsSection').classList.remove('hidden');
+                document.getElementById('invLogsSection').classList.add('hidden');
+            } else {
+                logBtn.className = 'py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs transition';
+                prodBtn.className = 'py-1.5 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 transition';
+                document.getElementById('invLogsSection').classList.remove('hidden');
+                document.getElementById('invProductsSection').classList.add('hidden');
+            }
+            renderInventory();
+        };
+
+        window.setStockLogFilter = function(f) {
+            stockLogFilter = f;
+            ['all', 'in', 'out'].forEach(k => {
+                const btn = document.getElementById(`log-filter-${k}`);
+                btn.className = k === f
+                    ? 'px-3 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white'
+                    : 'px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+            });
+            renderInventory();
+        };
+
+        window.renderInventory = function() {
+            // Update KPI Metrics
+            const totalTypes = inventoryProducts.length;
+            let totalUnits = 0;
+            let totalSellVal = 0;
+            let lowStockItems = 0;
+
+            inventoryProducts.forEach(p => {
+                const qty = Number(p.stock) || 0;
+                totalUnits += qty;
+                totalSellVal += qty * (Number(p.sellPrice) || 0);
+                if (qty <= (Number(p.lowAlert) || 0)) lowStockItems++;
+            });
+
+            document.getElementById('invProductTypesCount').textContent = totalTypes;
+            document.getElementById('invTotalStockCount').textContent = totalUnits.toLocaleString('en-US');
+            document.getElementById('invLowStockCount').textContent = lowStockItems;
+            document.getElementById('invTotalValueAmount').textContent = formatMMK(totalSellVal);
+
+            // Render Product Cards
+            const query = (document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
+            const filteredProds = inventoryProducts.filter(p => !query || p.name.toLowerCase().includes(query));
+            const prodListEl = document.getElementById('invProductList');
+
+            if (filteredProds.length === 0) {
+                prodListEl.innerHTML = `
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 text-center border border-slate-100 dark:border-slate-700/80">
+                        <div class="text-4xl mb-2">📦</div>
+                        <p class="text-sm font-bold text-slate-600 dark:text-slate-300">${currentLang === 'my' ? 'ကုန်ပစ္စည်းစာရင်း မရှိသေးပါ' : 'No products added yet'}</p>
+                        <p class="text-xs text-slate-400 mt-1">${currentLang === 'my' ? 'အပေါ်ညာဘက်ရှိ "+ ပစ္စည်းသစ်" ကိုနှိပ်ပြီး စာရင်းသွင်းပါ' : 'Tap "+ New Item" above to add shop items'}</p>
+                    </div>
+                `;
+            } else {
+                prodListEl.innerHTML = filteredProds.map(p => {
+                    const isLow = Number(p.stock) <= Number(p.lowAlert || 0);
+                    const profitPerUnit = (Number(p.sellPrice) || 0) - (Number(p.buyPrice) || 0);
+                    return `
+                        <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border ${isLow ? 'border-rose-300 dark:border-rose-800/70' : 'border-slate-100 dark:border-slate-700/80'} shadow-xs space-y-2.5">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="overflow-hidden">
+                                    <div class="flex items-center gap-1.5">
+                                        <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate">${p.name}</h4>
+                                        ${isLow ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-bold shrink-0">${currentLang === 'my' ? 'နည်းနေပြီ' : 'Low'}</span>` : ''}
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                        <span>${currentLang === 'my' ? 'ဝယ်:' : 'Buy:'} ${Number(p.buyPrice).toLocaleString('en-US')}</span>
+                                        <span>•</span>
+                                        <span class="text-indigo-600 dark:text-indigo-400 font-semibold">${currentLang === 'my' ? 'ရောင်း:' : 'Sell:'} ${Number(p.sellPrice).toLocaleString('en-US')} MMK</span>
+                                        <span>•</span>
+                                        <span class="text-emerald-600 dark:text-emerald-400">${currentLang === 'my' ? 'အမြတ်:' : 'Profit:'} +${profitPerUnit.toLocaleString('en-US')}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="text-base font-bold ${isLow ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-white'}">${p.stock}</span>
+                                    <span class="text-[11px] text-slate-400 ml-0.5">${p.unit || ''}</span>
+                                    <div class="flex justify-end gap-1 mt-1">
+                                        <button onclick="openProductModal('${p.id}')" class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">✎</button>
+                                        <button onclick="deleteProduct('${p.id}')" class="text-[11px] px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-500">🗑</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Stock In / Out Action Buttons -->
+                            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/70">
+                                <button onclick="openStockMoveModal('${p.id}', 'in')" class="py-2 px-3 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1 active:scale-95 transition">
+                                    <span>+</span>
+                                    <span>${currentLang === 'my' ? 'အဝင် (Stock In)' : 'Stock In'}</span>
+                                </button>
+                                <button onclick="openStockMoveModal('${p.id}', 'out')" class="py-2 px-3 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 text-amber-700 dark:text-amber-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1 active:scale-95 transition">
+                                    <span>−</span>
+                                    <span>${currentLang === 'my' ? 'အထွက်/ရောင်း (Out)' : 'Stock Out / Sell'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render Stock Movement Logs
+            const filteredLogs = stockLogs.filter(l => stockLogFilter === 'all' || l.type === stockLogFilter);
+            const logListEl = document.getElementById('invStockLogList');
+            if (filteredLogs.length === 0) {
+                logListEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">${currentLang === 'my' ? 'အဝင်/အထွက် မှတ်တမ်း မရှိသေးပါ' : 'No stock movement logs yet'}</p>`;
+            } else {
+                logListEl.innerHTML = filteredLogs.map(log => {
+                    const isIn = log.type === 'in';
+                    return `
+                        <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-2">
+                            <div class="overflow-hidden">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isIn ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400'}">
+                                        ${isIn ? (currentLang === 'my' ? '+ အဝင်' : '+ IN') : (currentLang === 'my' ? '- အထွက်' : '- OUT')}
+                                    </span>
+                                    <p class="text-xs font-bold text-slate-800 dark:text-white truncate">${log.productName}</p>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1 truncate">
+                                    ${log.date} ${log.time || ''} • ${log.qty} ${log.unit || ''} × ${Number(log.unitPrice).toLocaleString('en-US')} MMK
+                                    ${log.note ? `(${log.note})` : ''}
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <p class="text-xs font-bold ${isIn ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}">
+                                    ${Number(log.totalAmount).toLocaleString('en-US')} MMK
+                                </p>
+                                <button onclick="deleteStockLog('${log.id}')" class="text-[11px] text-slate-400 hover:text-rose-500 mt-0.5">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        };
+
+        // Product Add/Edit Modal Handlers
+        window.openProductModal = function(prodId = null) {
+            const modal = document.getElementById('productModal');
+            modal.classList.remove('hidden');
+            if (prodId) {
+                const p = inventoryProducts.find(x => x.id === prodId);
+                if (!p) return;
+                document.getElementById('productModalTitle').textContent = t('editProductModalTitle');
+                document.getElementById('editProductId').value = p.id;
+                document.getElementById('prodNameInput').value = p.name;
+                document.getElementById('prodBuyPriceInput').value = p.buyPrice;
+                document.getElementById('prodSellPriceInput').value = p.sellPrice;
+                document.getElementById('prodStockInput').value = p.stock;
+                document.getElementById('prodUnitInput').value = p.unit || 'ခု';
+                document.getElementById('prodLowAlertInput').value = p.lowAlert ?? 5;
+            } else {
+                document.getElementById('productModalTitle').textContent = t('addProductModalTitle');
+                document.getElementById('editProductId').value = '';
+                document.getElementById('prodNameInput').value = '';
+                document.getElementById('prodBuyPriceInput').value = '';
+                document.getElementById('prodSellPriceInput').value = '';
+                document.getElementById('prodStockInput').value = '0';
+                document.getElementById('prodUnitInput').value = currentLang === 'my' ? 'ခု' : 'pcs';
+                document.getElementById('prodLowAlertInput').value = '5';
+            }
+        };
+        window.closeProductModal = function() {
+            document.getElementById('productModal').classList.add('hidden');
+        };
+        window.handleProductSubmit = function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editProductId').value;
+            const prodObj = {
+                id: editId || String(Date.now()),
+                name: document.getElementById('prodNameInput').value.trim(),
+                buyPrice: parseFloat(document.getElementById('prodBuyPriceInput').value) || 0,
+                sellPrice: parseFloat(document.getElementById('prodSellPriceInput').value) || 0,
+                stock: parseInt(document.getElementById('prodStockInput').value, 10) || 0,
+                unit: document.getElementById('prodUnitInput').value.trim() || 'ခု',
+                lowAlert: parseInt(document.getElementById('prodLowAlertInput').value, 10) || 0
+            };
+
+            if (editId) {
+                inventoryProducts = inventoryProducts.map(p => p.id === editId ? prodObj : p);
+            } else {
+                inventoryProducts.unshift(prodObj);
+            }
+            saveInventoryData();
+            closeProductModal();
+            renderInventory();
+            showToast(t('toastSaved'));
+        };
+
+        window.deleteProduct = function(prodId) {
+            showConfirm(t('confirmDelTitle'), t('confirmDelMsg'), () => {
+                inventoryProducts = inventoryProducts.filter(p => p.id !== prodId);
+                saveInventoryData();
+                renderInventory();
+                showToast(t('toastDeleted'));
+            });
+        };
+
+        // Stock In / Out Modal Handlers
+        window.openStockMoveModal = function(prodId, type) {
+            const p = inventoryProducts.find(x => x.id === prodId);
+            if (!p) return;
+            activeStockMove = { productId: prodId, type };
+
+            const isIn = type === 'in';
+            document.getElementById('stockMoveTitle').textContent = isIn
+                ? (currentLang === 'my' ? 'ပစ္စည်းအဝင် (+ Stock In)' : 'Stock In (+ Add Stock)')
+                : (currentLang === 'my' ? 'ပစ္စည်းအထွက် / ရောင်းချမှု (- Out)' : 'Stock Out / Sale (- Deduct)');
+            document.getElementById('stockMoveProductInfo').textContent = `${p.name} (${currentLang === 'my' ? 'လက်ကျန်:' : 'Current:'} ${p.stock} ${p.unit})`;
+
+            document.getElementById('moveQtyInput').value = 1;
+            document.getElementById('moveUnitPriceInput').value = isIn ? p.buyPrice : p.sellPrice;
+            document.getElementById('moveNoteInput').value = '';
+            document.getElementById('moveSyncMoneyCheckbox').checked = !isIn; // Default checked for Sales (Income), optional for Stock In
+            document.getElementById('moveSyncMoneyText').textContent = isIn
+                ? (currentLang === 'my' ? 'ထွက်ငွေစာရင်းထဲ အလိုအလျောက်ထည့်မည် (Expense)' : 'Auto-record as Expense in Money Tracker')
+                : (currentLang === 'my' ? 'ဝင်ငွေစာရင်းထဲ အလိုအလျောက်ထည့်မည် (Income)' : 'Auto-record as Income in Money Tracker');
+
+            const submitBtn = document.getElementById('stockMoveSubmitBtn');
+            submitBtn.className = isIn
+                ? 'w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg'
+                : 'w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg';
+
+            updateStockMoveTotal();
+            document.getElementById('stockMoveModal').classList.remove('hidden');
+        };
+        window.closeStockMoveModal = function() {
+            document.getElementById('stockMoveModal').classList.add('hidden');
+        };
+        window.updateStockMoveTotal = function() {
+            const qty = parseFloat(document.getElementById('moveQtyInput').value) || 0;
+            const price = parseFloat(document.getElementById('moveUnitPriceInput').value) || 0;
+            document.getElementById('moveTotalPreview').textContent = formatMMK(qty * price);
+        };
+        window.handleStockMoveSubmit = async function(e) {
+            e.preventDefault();
+            const p = inventoryProducts.find(x => x.id === activeStockMove.productId);
+            if (!p) return;
+
+            const qty = parseInt(document.getElementById('moveQtyInput').value, 10) || 0;
+            const unitPrice = parseFloat(document.getElementById('moveUnitPriceInput').value) || 0;
+            const note = document.getElementById('moveNoteInput').value.trim();
+            const syncMoney = document.getElementById('moveSyncMoneyCheckbox').checked;
+
+            if (qty <= 0) return;
+            if (activeStockMove.type === 'out' && qty > p.stock) {
+                showToast(currentLang === 'my' ? 'လက်ကျန်ပစ္စည်း မလုံလောက်ပါ!' : 'Insufficient stock quantity!');
+                return;
+            }
+
+            // Update stock quantity
+            if (activeStockMove.type === 'in') p.stock += qty;
+            else p.stock -= qty;
+
+            const now = new Date();
+            const dateStr = formatDateYMD(now);
+            const timeStr = now.toTimeString().slice(0, 5);
+            const totalAmount = qty * unitPrice;
+
+            const logEntry = {
+                id: String(Date.now()),
+                productId: p.id,
+                productName: p.name,
+                unit: p.unit,
+                type: activeStockMove.type,
+                qty,
+                unitPrice,
+                totalAmount,
+                note,
+                date: dateStr,
+                time: timeStr
+            };
+            stockLogs.unshift(logEntry);
+            saveInventoryData();
+
+            // Optionally record into main Money Tracker
+            if (syncMoney && totalAmount > 0) {
+                const isStockIn = activeStockMove.type === 'in';
+                const txNote = isStockIn
+                    ? `${currentLang === 'my' ? 'ပစ္စည်းအဝင်:' : 'Stock In:'} ${p.name} (${qty} ${p.unit})`
+                    : `${currentLang === 'my' ? 'အရောင်း:' : 'Sale:'} ${p.name} (${qty} ${p.unit})`;
+
+                await saveTransactionItem({
+                    id: String(Date.now() + 1),
+                    type: isStockIn ? 'expense' : 'income',
+                    amount: totalAmount,
+                    category: isStockIn ? 'shopping' : 'business',
+                    note: note ? `${txNote} - ${note}` : txNote,
+                    date: dateStr
+                });
+            }
+
+            closeStockMoveModal();
+            renderInventory();
+            showToast(t('toastSaved'));
+        };
+
+        window.deleteStockLog = function(logId) {
+            stockLogs = stockLogs.filter(l => l.id !== logId);
+            saveInventoryData();
+            renderInventory();
+            showToast(t('toastDeleted'));
+        };
+
+        window.exportInventoryCSV = function() {
+            if (inventoryProducts.length === 0) {
+                showToast(currentLang === 'my' ? 'ထုတ်ယူရန် ပစ္စည်းစာရင်းမရှိသေးပါ' : 'No products to export');
+                return;
+            }
+            const headers = ['Product Name', 'Buy Price (MMK)', 'Sell Price (MMK)', 'Current Stock', 'Unit', 'Total Value (MMK)'];
+            const rows = inventoryProducts.map(p => [
+                `"${p.name.replace(/"/g, '""')}"`,
+                p.buyPrice,
+                p.sellPrice,
+                p.stock,
+                p.unit,
+                p.stock * p.sellPrice
+            ]);
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csvContent));
+            link.setAttribute('download', `shop_inventory_${formatDateYMD(new Date())}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast(currentLang === 'my' ? 'ကုန်ပစ္စည်း CSV ဒေါင်းလုဒ်ဆွဲပြီးပါပြီ ✓' : 'Inventory CSV Exported ✓');
+        };
+    </script>
+</body>
+</html>
